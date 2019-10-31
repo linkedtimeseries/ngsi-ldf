@@ -164,6 +164,7 @@ async function getLatest(req, res, geoFragmenter: GeoFragmenter) {
 }
 
 function addHeaders(res, done?: boolean) {
+    res.type("application/ld+json; charset=utf-8");
     if (done) {
         res.set("Cache-Control", `public, max-age=${60 * 60 * 24}`);
     } else {
