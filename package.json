@@ -13,6 +13,8 @@
   },
   "main": "lib/app.js",
   "dependencies": {
+    "@tusbar/cache-control": "^0.3.1",
+    "cors": "^2.8.5",
     "debug": "^2.2.0",
     "express": "^4.14.0",
     "global-mercator": "^3.0.3",

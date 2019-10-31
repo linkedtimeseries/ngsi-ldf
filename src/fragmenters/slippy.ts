@@ -85,7 +85,41 @@ export default class SlippyFragmenter extends GeoFragmenter {
     public getDataSearchTemplate(baseUri: string) {
         return {
             "@type": "hydraIriTemplate",
-            "hydra:template": `${baseUri}/{z}/{x}/{y}{?page,period}`,
+            "hydra:template": `${baseUri}/{z}/{x}/{y}{?page}`,
+            "hydra:variableRepresentation": "hydra:BasicRepresentation",
+            "hydra:mapping": [
+                {
+                    "@type": "hydra:IriTemplateMapping",
+                    "hydra:variable": "z",
+                    "hydra:property": "tiles:zoom",
+                    "hydra:required": true,
+                },
+                {
+                    "@type": "hydra:IriTemplateMapping",
+                    "hydra:variable": "x",
+                    "hydra:property": "tiles:longitudeTile",
+                    "hydra:required": true,
+                },
+                {
+                    "@type": "hydra:IriTemplateMapping",
+                    "hydra:variable": "y",
+                    "hydra:property": "tiles:latitudeTile",
+                    "hydra:required": true,
+                },
+                {
+                    "@type": "hydra:IriTemplateMapping",
+                    "hydra:variable": "page",
+                    "hydra:property": "dcterms:date",
+                    "hydra:required": false,
+                },
+            ],
+        };
+    }
+
+    public getSummarySearchTemplate(baseUri: string) {
+        return {
+            "@type": "hydraIriTemplate",
+            "hydra:template": `${baseUri}/{z}/{x}/{y}/summary{?page,period}`,
             "hydra:variableRepresentation": "hydra:BasicRepresentation",
             "hydra:mapping": [
                 {
@@ -115,41 +149,7 @@ export default class SlippyFragmenter extends GeoFragmenter {
                 {
                     "@type": "hydra:IriTemplateMapping",
                     "hydra:variable": "period",
-                    "hydra:property": "ex:hasAggregationPeriod",
-                    "hydra:required": false,
-                },
-            ],
-        };
-    }
-
-    public getSummarySearchTemplate(baseUri: string) {
-        return {
-            "@type": "hydraIriTemplate",
-            "hydra:template": `${baseUri}/{z}/{x}/{y}/summary{?page}`,
-            "hydra:variableRepresentation": "hydra:BasicRepresentation",
-            "hydra:mapping": [
-                {
-                    "@type": "hydra:IriTemplateMapping",
-                    "hydra:variable": "z",
-                    "hydra:property": "tiles:zoom",
-                    "hydra:required": true,
-                },
-                {
-                    "@type": "hydra:IriTemplateMapping",
-                    "hydra:variable": "x",
-                    "hydra:property": "tiles:longitudeTile",
-                    "hydra:required": true,
-                },
-                {
-                    "@type": "hydra:IriTemplateMapping",
-                    "hydra:variable": "y",
-                    "hydra:property": "tiles:latitudeTile",
-                    "hydra:required": true,
-                },
-                {
-                    "@type": "hydra:IriTemplateMapping",
-                    "hydra:variable": "page",
-                    "hydra:property": "dcterms:date",
+                    "hydra:property": "cot:hasAggregationPeriod",
                     "hydra:required": false,
                 },
             ],

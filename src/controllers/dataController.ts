@@ -88,20 +88,27 @@ function extractVocubalary(data) {
 }
 
 function expandVocabulary(vocabulary) {
-    vocabulary[0]["tree"] = "https://w3id.org/tree/terms#";
-    vocabulary[0]["tree:child"] = {
+    let targetContext;
+    if (vocabulary && vocabulary.length) {
+        targetContext = vocabulary[0];
+    } else {
+        targetContext = vocabulary;
+    }
+
+    targetContext["tree"] = "https://w3id.org/tree/terms#";
+    targetContext["tree:child"] = {
         "@type": "@id",
     };
-    vocabulary[0]["tiles"] = "https://w3id.org/tree/terms#";
-    vocabulary[0]["hydra"] = "http://www.w3.org/ns/hydra/core#";
-    vocabulary[0]["hydra:variableRepresentation"] = {
+    targetContext["tiles"] = "https://w3id.org/tree/terms#";
+    targetContext["hydra"] = "http://www.w3.org/ns/hydra/core#";
+    targetContext["hydra:variableRepresentation"] = {
         "@type": "@id",
     };
-    vocabulary[0]["hydra:property"] = {
+    targetContext["hydra:property"] = {
         "@type": "@id",
     };
-    vocabulary[0]["sh"] = "https://www.w3.org/ns/shacl#";
-    vocabulary[0]["sh:path"] = {
+    targetContext["sh"] = "https://www.w3.org/ns/shacl#";
+    targetContext["sh:path"] = {
         "@type": "@id",
     };
 }
@@ -114,6 +121,7 @@ function simplifyGraph(vocabulary, graph) {
 }
 
 async function getPage(req, res, timeFragmenter: TimeFragmenter, geoFragmenter: GeoFragmenter) {
+    const currentTime = new Date();
     const fromTime = timeFragmenter.getFromTime(req.query.page);
     const toTime = timeFragmenter.getNextTime(fromTime);
 
@@ -130,6 +138,7 @@ async function getPage(req, res, timeFragmenter: TimeFragmenter, geoFragmenter: 
     const data = await response.json();
 
     const pagedData = wrapPage(req, data, timeFragmenter, geoFragmenter);
+    addHeaders(res, toTime < currentTime);
     res.status(200).send(pagedData);
 }
 
@@ -149,7 +158,17 @@ async function getLatest(req, res, geoFragmenter: GeoFragmenter) {
     const data = await response.json();
 
     const pagedData = wrapLatest(req, data, toTime, geoFragmenter);
+
+    addHeaders(res, false);
     res.status(200).send(pagedData);
+}
+
+function addHeaders(res, done?: boolean) {
+    if (done) {
+        res.set("Cache-Control", `public, max-age=${60 * 60 * 24}`);
+    } else {
+        res.set("Cache-Control", "public, max-age=5");
+    }
 }
 
 export async function getSlippyPage(req, res) {

@@ -1,3 +1,4 @@
+import cacheControl = require("@tusbar/cache-control");
 import md5 = require("md5");
 import fetch = require("node-fetch");
 
@@ -7,8 +8,17 @@ import H3Fragmenter from "../fragmenters/h3";
 import SlippyFragmenter from "../fragmenters/slippy";
 import TimeFragmenter from "../fragmenters/time";
 
+const HOURLY = "https://w3id.org/city_of_things#Hourly";
+const DAILY = "https://w3id.org/city_of_things#Daily";
+
 const SOURCE_URI = "http://localhost:3001";
-const TARGET_URI = "http://localhost:3002";
+const TARGET_URI = "http://localhost:3001";
+
+interface ICacheEntry {
+    ts: Date;
+    maxAge: number;
+    data: object;
+}
 
 interface ISourceData {
     context: object;
@@ -53,6 +63,29 @@ function extractVocubalary(data) {
     return data["@context"][0];
 }
 
+const CACHE: Map<string, ICacheEntry> = new Map();
+async function getCached(uri: string): Promise<object> {
+    if (CACHE.has(uri)) {
+        const { ts, maxAge, data } = CACHE.get(uri);
+        if (ts.getTime() + maxAge * 1000 > new Date().getTime()) {
+            return data;
+        }
+    }
+
+    console.log("GET", uri);
+    const response = await fetch(uri);
+    const data = await response.json();
+    const maxAge = cacheControl.parse(response.headers.get("cache-control")).maxAge || 1;
+
+    CACHE.set(uri, {
+        ts: new Date(),
+        maxAge,
+        data,
+    });
+
+    return data;
+}
+
 async function getSourceData(fromTime: Date, toTime: Date, endpoint: string): Promise<ISourceData> {
     const graph: IObservation[] = [];
     let context = {};
@@ -61,8 +94,7 @@ async function getSourceData(fromTime: Date, toTime: Date, endpoint: string): Pr
     let currentTime = fromTime;
     while (currentTime < toTime) {
         const uri = `${endpoint}?page=${currentTime.toISOString()}`;
-        const response = await fetch(uri);
-        const data = await response.json();
+        const data = await getCached(uri);
 
         context = extractVocubalary(data);
         resources.push(uri);
@@ -95,49 +127,6 @@ async function getSourceData(fromTime: Date, toTime: Date, endpoint: string): Pr
         graph,
         resourcesUsed: resources,
     };
-}
-
-function average(data) {
-    return sum(data) / count(data);
-}
-
-function count(data): number {
-    return data.length;
-}
-
-function maximum(data): number {
-    return Math.max(...data);
-}
-
-function minimum(data): number {
-    return Math.min(...data);
-}
-
-function diffs(data): number[] {
-    const a = average(data);
-    return data.map((value) => {
-        return value - a;
-    });
-}
-
-function squareDiffs(data): number[] {
-    return diffs(data).map((v) => v * v);
-}
-
-function avgSquareDiff(data): number {
-    return average(squareDiffs(data));
-}
-
-function stddev(data) {
-    return Math.sqrt(variance(data));
-}
-
-function variance(data) {
-    return avgSquareDiff(data) / sum(data);
-}
-
-function sum(data): number {
-    return data.reduce((a, b) => a + b, 0);
 }
 
 function selectBuckets(
@@ -236,14 +225,14 @@ function wrapAggregation(value: IAggregation, period, geoMetaData) {
 
     const result = {};
     result["@id"] = `${TARGET_URI}/aggregation/${hash}`;
-    result["@type"] = "ex:Aggregation";
-    result["ex:hasAggregationPeriod"] = period;
-    result["ex:usingFunction"] = value.function;
-    result["ex:duringPeriod"] = {
+    result["@type"] = "cot:Aggregation";
+    result["cot:hasAggregationPeriod"] = period;
+    result["cot:usingFunction"] = value.function;
+    result["cot:duringPeriod"] = {
         "schema:startDate": value.timeStart.toISOString(),
         "schema:endDate": value.timeEnd.toISOString(),
     };
-    result["ex:inArea"] = {
+    result["cot:inArea"] = {
         ...geoMetaData,
     };
     if (value.sensor) {
@@ -258,10 +247,22 @@ function wrapAggregation(value: IAggregation, period, geoMetaData) {
 async function getPage(
     req,
     res,
-    aggregateTimeFragmenter: TimeFragmenter,
-    pageTimeFragmenter: TimeFragmenter,
     geoFragmenter: GeoFragmenter,
 ) {
+    let period: string;
+    let aggregateTimeFragmenter: TimeFragmenter;
+    let pageTimeFragmenter: TimeFragmenter;
+
+    if (req.query.period === DAILY) {
+        period = DAILY;
+        aggregateTimeFragmenter = new TimeFragmenter(TimeFragmenter.DAY);
+        pageTimeFragmenter = new TimeFragmenter(TimeFragmenter.DAY * 7);
+    } else {
+        period = HOURLY;
+        aggregateTimeFragmenter = new TimeFragmenter(TimeFragmenter.HOUR);
+        pageTimeFragmenter = new TimeFragmenter(TimeFragmenter.HOUR * 6);
+    }
+
     const precision = geoFragmenter.getPrecision(req);
     const {
         minimum: minimumPrecision,
@@ -273,8 +274,9 @@ async function getPage(
         return;
     }
 
+    const currentTime = new Date();
     const fromTime = pageTimeFragmenter.getFromTime(req.query.page);
-    const lastPossibleTime = aggregateTimeFragmenter.getLastCompleteTime();
+    const lastPossibleTime = new Date();
     const previousTime = pageTimeFragmenter.getPreviousTime(fromTime);
     const nextTime = pageTimeFragmenter.getNextTime(fromTime);
     const toTime = lastPossibleTime < nextTime ? lastPossibleTime : nextTime;
@@ -286,27 +288,27 @@ async function getPage(
     const aggregations = aggregate(sourceData, buckets, [
         {
             function: sum,
-            name: "ex:Sum",
+            name: "cot:Sum",
         },
         {
             function: count,
-            name: "ex:Count",
+            name: "cot:Count",
         },
         {
             function: average,
-            name: "ex:Average",
+            name: "cot:Average",
         },
         {
             function: minimum,
-            name: "ex:Minimum",
+            name: "cot:Minimum",
         },
         {
             function: maximum,
-            name: "ex:Maximum",
+            name: "cot:Maximum",
         },
         {
             function: stddev,
-            name: "ex:StdDev",
+            name: "cot:StdDev",
         },
     ]);
 
@@ -314,21 +316,28 @@ async function getPage(
 
     const children = [{
         "@type": "tree:LesserThanRelation",
-        "tree:child": geoFragmenter.getSummaryFragmentURI(TARGET_URI, focus, precision, previousTime),
+        "tree:child": geoFragmenter.getSummaryFragmentURI(TARGET_URI, focus, precision, previousTime, period),
     }];
 
     if (new Date() > nextTime) {
         children.push({
             "@type": "tree:GreaterThanRelation",
-            "tree:child": geoFragmenter.getSummaryFragmentURI(TARGET_URI, focus, precision, nextTime),
+            "tree:child": geoFragmenter.getSummaryFragmentURI(TARGET_URI, focus, precision, nextTime, period),
         });
     }
 
-    const period = "https://example.org/ns/cot/hourly";
-
     const result = {
-        "@context": sourceData.context,
-        "@id": geoFragmenter.getSummaryFragmentURI(TARGET_URI, focus, precision, fromTime),
+        "@context": {
+            ...sourceData.context,
+            "cot": "https://w3id.org/city_of_things#",
+            "cot:hasAggregationPeriod": {
+                "@type": "@id",
+            },
+            "cot:usingFunction": {
+                "@type": "@id",
+            },
+        },
+        "@id": geoFragmenter.getSummaryFragmentURI(TARGET_URI, focus, precision, fromTime, period),
         "@type": "tree:Node",
         ...geoMetaData,
         "tree:childRelation": children,
@@ -342,44 +351,78 @@ async function getPage(
             "@type": "hydra:Collection",
             "hydra:search": geoFragmenter.getSummarySearchTemplate(TARGET_URI),
         },
+        "prov:wasDerivedFrom": sourceData.resourcesUsed,
         "@graph": aggregations.map((element) => {
             return wrapAggregation(element, period, geoMetaData);
         }),
     };
 
+    addHeaders(res, toTime < currentTime);
     res.status(200).send(result);
+}
+
+function addHeaders(res, done?: boolean) {
+    if (done) {
+        res.set("Cache-Control", `public, max-age=${60 * 60 * 24}`);
+    } else {
+        res.set("Cache-Control", "public, max-age=5");
+    }
+}
+
+function average(data) {
+    return sum(data) / count(data);
+}
+
+function count(data): number {
+    return data.length;
+}
+
+function maximum(data): number {
+    return Math.max(...data);
+}
+
+function minimum(data): number {
+    return Math.min(...data);
+}
+
+function diffs(data): number[] {
+    const a = average(data);
+    return data.map((value) => {
+        return value - a;
+    });
+}
+
+function squareDiffs(data): number[] {
+    return diffs(data).map((v) => v * v);
+}
+
+function avgSquareDiff(data): number {
+    return average(squareDiffs(data));
+}
+
+function stddev(data) {
+    return Math.sqrt(variance(data));
+}
+
+function variance(data) {
+    return avgSquareDiff(data) / sum(data);
+}
+
+function sum(data): number {
+    return data.reduce((a, b) => a + b, 0);
 }
 
 export async function getSlippySummaryPage(req, res) {
     const geoFragmenter = new SlippyFragmenter();
-    await getPage(
-        req,
-        res,
-        new TimeFragmenter(TimeFragmenter.HOUR),
-        new TimeFragmenter(TimeFragmenter.HOUR * 6),
-        geoFragmenter,
-    );
+    await getPage(req, res, geoFragmenter);
 }
 
 export async function getGeohashSummaryPage(req, res) {
     const geoFragmenter = new GeohashFragmenter();
-    await getPage(
-        req,
-        res,
-        new TimeFragmenter(TimeFragmenter.HOUR),
-        new TimeFragmenter(TimeFragmenter.HOUR * 6),
-        geoFragmenter,
-    );
-
+    await getPage(req, res, geoFragmenter);
 }
 
 export async function getH3SummaryPage(req, res) {
     const geoFragmenter = new H3Fragmenter();
-    await getPage(
-        req,
-        res,
-        new TimeFragmenter(TimeFragmenter.HOUR),
-        new TimeFragmenter(TimeFragmenter.HOUR * 6),
-        geoFragmenter,
-    );
+    await getPage(req, res, geoFragmenter);
 }

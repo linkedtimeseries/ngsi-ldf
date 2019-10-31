@@ -1,9 +1,13 @@
-﻿import debug = require("debug");
+﻿import cors = require("cors");
+import debug = require("debug");
 import express = require("express");
 
 import routes from "./routes/all";
 
 const app = express();
+
+app.options("*", cors());
+app.use(cors());
 
 app.use("/", routes);
 app.set("port", process.env.PORT || 3001);

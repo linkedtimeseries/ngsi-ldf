@@ -33,9 +33,10 @@ export abstract class GeoFragmenter {
         return `${geospatial}/latest`;
     }
 
-    public getSummaryFragmentURI(base: string, focus: ILocation, precision: number, time: Date) {
+    public getSummaryFragmentURI(base: string, focus: ILocation, precision: number, time: Date, period: string) {
         const path = this.getFragmentPath(focus, precision);
         const geospatial = `${base}${path}`;
-        return `${geospatial}/summary?page=${time.toISOString()}`;
+        const encoded = encodeURIComponent(period);
+        return `${geospatial}/summary?page=${time.toISOString()}&period=${encoded}`;
     }
 }
