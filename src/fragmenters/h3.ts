@@ -63,7 +63,7 @@ export default class H3Fragmenter extends GeoFragmenter {
                 {
                     "@type": "hydra:IriTemplateMapping",
                     "hydra:variable": "page",
-                    "hydra:property": "dcterms:date",
+                    "hydra:property": "schema:startDate",
                     "hydra:required": false,
                 },
             ],
@@ -85,7 +85,7 @@ export default class H3Fragmenter extends GeoFragmenter {
                 {
                     "@type": "hydra:IriTemplateMapping",
                     "hydra:variable": "page",
-                    "hydra:property": "dcterms:date",
+                    "hydra:property": "schema:startDate",
                     "hydra:required": false,
                 },
             ],

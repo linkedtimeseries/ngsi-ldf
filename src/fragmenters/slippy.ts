@@ -109,7 +109,7 @@ export default class SlippyFragmenter extends GeoFragmenter {
                 {
                     "@type": "hydra:IriTemplateMapping",
                     "hydra:variable": "page",
-                    "hydra:property": "dcterms:date",
+                    "hydra:property": "schema:startDate",
                     "hydra:required": false,
                 },
             ],
@@ -143,7 +143,7 @@ export default class SlippyFragmenter extends GeoFragmenter {
                 {
                     "@type": "hydra:IriTemplateMapping",
                     "hydra:variable": "page",
-                    "hydra:property": "dcterms:date",
+                    "hydra:property": "schema:startDate",
                     "hydra:required": false,
                 },
                 {
