@@ -1,7 +1,7 @@
-import cacheControl = require("@tusbar/cache-control");
+import { Request, Response } from "express";
 import md5 = require("md5");
-import fetch = require("node-fetch");
 
+import { getCached } from "../cache/cache";
 import { GeoFragmenter } from "../fragmenters/GeoFragmenter";
 import GeohashFragmenter from "../fragmenters/geohash";
 import H3Fragmenter from "../fragmenters/h3";
@@ -14,83 +14,60 @@ const DAILY = "https://w3id.org/cot/Daily";
 const SOURCE_URI = "http://localhost:3001";
 const TARGET_URI = "http://localhost:3001";
 
-interface ICacheEntry {
-    ts: Date;
-    maxAge: number;
-    data: object;
-}
-
+/* Collection of all the fetched source data */
 interface ISourceData {
-    context: object;
-    graph: IObservation[];
-    resourcesUsed: string[];
+    context: object; // json-ld context for all the data
+    graph: IObservation[]; // knowledge graph of all the data
+    resourcesUsed: string[]; // original resources of all the data
 }
 
+/* The essential data of a single observation */
 interface IObservation {
-    sensor: string;
-    feature: string;
-    observedProperty: string;
-    value: number;
-    unitCode: string;
-    time: Date;
+    sensor: string; // who made the observation
+    feature: string; // what's the sensor trying to measure
+    observedProperty: string; // which property did it measure
+    value: number; // what was the result
+    unitCode: string; // what the result's unit, UN/CEFACT Common Code
+    time: Date; // when was the observation done
 }
 
+/*
+ * The essential data of a single aggregation
+ * Excluding the region, because the data for this varies
+ */
 interface IAggregation {
-    function: string;
-    timeStart: Date;
-    timeEnd: Date;
-    sensor: string;
-    observedProperty: string;
-    value: number;
-    unitCode: string;
+    function: string; // which function was used
+    timeStart: Date; // when the aggregation period starts
+    timeEnd: Date; // when the aggregation period stops
+    sensor?: string; // if aggregating over sensor ids
+    observedProperty: string; // the measured property
+    value: number; // the result
+    unitCode: string; // the result's unit, UN/CEFACT Common Code
 }
 
+/*
+ * Defines which observation values go into a single bucket
+ * Excluding the region, because the data for this varies
+ */
 interface IBucket {
-    sensor?: string;
-    feature: string;
-    observedProperty: string;
-    timeStart: Date;
-    timeEnd: Date;
+    sensor?: string; // aggregating over sensor ids, optionally
+    feature: string; // the feature of interest
+    observedProperty: string; // the measured property
+    timeStart: Date; // when the aggregation period starts
+    timeEnd: Date; // when the aggregation period stops
 }
 
-interface IAggregationFunction {
-    function: (data: number[]) => number;
-    name: string;
-}
-
-function extractVocubalary(data) {
-    // fixme; simple placeholder
-    return data["@context"][0];
-}
-
-const CACHE: Map<string, ICacheEntry> = new Map();
-async function getCached(uri: string): Promise<object> {
-    if (CACHE.has(uri)) {
-        const { ts, maxAge, data } = CACHE.get(uri);
-        if (ts.getTime() + maxAge * 1000 > new Date().getTime()) {
-            return data;
-        }
-    }
-
-    console.log("GET", uri);
-    const response = await fetch(uri);
-    const data = await response.json();
-    const maxAge = cacheControl.parse(response.headers.get("cache-control")).maxAge || 1;
-
-    CACHE.set(uri, {
-        ts: new Date(),
-        maxAge,
-        data,
-    });
-
-    return data;
-}
-
-async function getSourceData(fromTime: Date, toTime: Date, endpoint: string): Promise<ISourceData> {
+/* Fetches raw data */
+async function getSourceData(
+    fromTime: Date, // begin aggregation period
+    toTime: Date, // end aggregation period
+    endpoint: string, // API endpoint that contains the raw data; already geospatially fragmented
+): Promise<ISourceData> {
     const graph: IObservation[] = [];
     let context = {};
     const resources = [];
 
+    // keep following links until we have all the required data
     let currentTime = fromTime;
     while (currentTime < toTime) {
         const uri = `${endpoint}?page=${currentTime.toISOString()}`;
@@ -102,6 +79,7 @@ async function getSourceData(fromTime: Date, toTime: Date, endpoint: string): Pr
             const sensor = element.id;
             const feature = element.featureOfInterest;
 
+            // TODO; move to config
             for (const metric of ["NO2", "O3", "PM10", "PM1", "PM25"]) {
                 if (!element[metric]) {
                     continue;
@@ -129,15 +107,19 @@ async function getSourceData(fromTime: Date, toTime: Date, endpoint: string): Pr
     };
 }
 
+/*
+ * Figure out which buckets we have to fill
+ * Just the cartesian product of all source values
+ */
 function selectBuckets(
-    data: ISourceData,
-    fromTime: Date,
-    toTime: Date,
-    aggregateTimeFragmenter: TimeFragmenter,
+    data: ISourceData, // the raw data
+    fromTime: Date, // start of earliest aggregation period
+    toTime: Date, // end of latest aggregation period
+    aggregateTimeFragmenter: TimeFragmenter, // how to fragment the time in between fromTime and toTime
 ): IBucket[] {
     const buckets: IBucket[] = [];
     const sensors: Set<string> = new Set();
-    sensors.add(null);
+    sensors.add(null); // aggregating by sensor is optional
 
     const features: Set<string> = new Set();
     const properties: Set<string> = new Set();
@@ -170,6 +152,7 @@ function selectBuckets(
     return buckets;
 }
 
+/* Aggregate the source data using the given buckets/function */
 function aggregate(data: ISourceData, buckets: IBucket[], functions: IAggregationFunction[]): IAggregation[] {
     const result: IAggregation[] = [];
 
@@ -178,6 +161,7 @@ function aggregate(data: ISourceData, buckets: IBucket[], functions: IAggregatio
         const bucketData: number[] = [];
 
         for (const observation of data.graph) {
+            // this seems horribly inefficient, but it's good enough for now
             unitCode = observation.unitCode;
 
             if (observation.feature !== bucket.feature) {
@@ -220,10 +204,14 @@ function aggregate(data: ISourceData, buckets: IBucket[], functions: IAggregatio
     return result;
 }
 
-function wrapAggregation(value: IAggregation, period, geoMetaData) {
-    const hash = md5(JSON.stringify([value, geoMetaData]));
-
+/* Wraps a single aggregation value into a JSON-LD object */
+function wrapAggregation(
+    value: IAggregation, // the aggregation value
+    period: string, // the aggregation period URI
+    geoMetaData: object, // description of the geospatial region that's being aggregated
+) {
     const result = {};
+    const hash = md5(JSON.stringify([value, geoMetaData])); // generate a (probably) unique ID
     result["@id"] = `${TARGET_URI}/aggregation/${hash}`;
     result["@type"] = "cot:Aggregation";
     result["cot:hasAggregationPeriod"] = period;
@@ -238,31 +226,99 @@ function wrapAggregation(value: IAggregation, period, geoMetaData) {
     if (value.sensor) {
         result["sosa:madeBySensor"] = value.sensor;
     }
-    result["sosa:observedProperty"] = value.observedProperty;
+    result["sosa:observedProperty"] = `cot:${value.observedProperty}`; // can't use relative URIs as objects
+
+    // TODO; would be cleaner with sosa:hasResult, qudt:hasNumericValue, and qudt:unit
     result["sosa:hasSimpleResult"] = value.value;
     result["schema:unitCode"] = value.unitCode;
     return result;
 }
 
-async function getPage(
-    req,
-    res,
-    geoFragmenter: GeoFragmenter,
+function wrapPage(
+    req: Request, // the original request
+    sourceData: ISourceData, // the source data
+    aggregatedData: IAggregation[], // the aggregated data
+    timeFragmenter: TimeFragmenter, // temporal fragmentation strategy
+    geoFragmenter: GeoFragmenter, // geospatial fragmentation strategy
+    period: string, // aggregation period URI
 ) {
-    let period: string;
-    let aggregateTimeFragmenter: TimeFragmenter;
-    let pageTimeFragmenter: TimeFragmenter;
+    // figure out which area this fragment covers
+    const focus = geoFragmenter.getFocusPoint(req);
+    const precision = geoFragmenter.getPrecision(req);
+
+    // figure out which period this fragment covers
+    const fromTime = timeFragmenter.getFromTime(req.query.page);
+    const nextTime = timeFragmenter.getNextTime(fromTime);
+    const previousTime = timeFragmenter.getPreviousTime(fromTime);
+
+    const geoMetaData = geoFragmenter.getMetaData(focus, precision);
+
+    // add links to previous/next pages
+    const children = [{
+        "@type": "tree:LesserThanRelation",
+        "tree:child": geoFragmenter.getSummaryFragmentURI(TARGET_URI, focus, precision, previousTime, period),
+    }];
+
+    if (new Date() > nextTime) {
+        children.push({
+            "@type": "tree:GreaterThanRelation",
+            "tree:child": geoFragmenter.getSummaryFragmentURI(TARGET_URI, focus, precision, nextTime, period),
+        });
+    }
+
+    const context = sourceData.context;
+    expandVocabulary(context);
+
+    // build the fragment
+    const result = {
+        "@context": context,
+        "@id": geoFragmenter.getSummaryFragmentURI(TARGET_URI, focus, precision, fromTime, period),
+        "@type": "tree:Node",
+        ...geoMetaData,
+        "tree:childRelation": children,
+        "tree:value": {
+            "schema:startDate": fromTime.toISOString(),
+            "schema:endDate": nextTime.toISOString(),
+        },
+        "sh:path": "schema:startDate",
+        "dcterms:isPartOf": {
+            "@id": TARGET_URI,
+            "@type": "hydra:Collection",
+            "hydra:search": geoFragmenter.getSummarySearchTemplate(TARGET_URI),
+        },
+        "prov:wasDerivedFrom": sourceData.resourcesUsed,
+        "@graph": aggregatedData.map((element) => {
+            return wrapAggregation(element, period, geoMetaData);
+        }),
+    };
+
+    return result;
+}
+
+async function getPage(
+    req: Request, // the original request
+    res: Response, // the response object
+    geoFragmenter: GeoFragmenter, // geospatial fragmentation strategy
+) {
+    let period: string; // aggregation period URI
+    let aggregateTimeFragmenter: TimeFragmenter; // fragmentation strategy for individual aggregations
+    let pageTimeFragmenter: TimeFragmenter; // fragmentation strategy to combine aggregations into pages
 
     if (req.query.period === DAILY) {
+        // one aggregation per day
+        // 7 aggregation periods per page
         period = DAILY;
         aggregateTimeFragmenter = new TimeFragmenter(TimeFragmenter.DAY);
         pageTimeFragmenter = new TimeFragmenter(TimeFragmenter.DAY * 7);
     } else {
+        // one aggregation per hour
+        // 6 aggregation periods per page
         period = HOURLY;
         aggregateTimeFragmenter = new TimeFragmenter(TimeFragmenter.HOUR);
         pageTimeFragmenter = new TimeFragmenter(TimeFragmenter.HOUR * 6);
     }
 
+    // check if we want to support this level of granularity
     const precision = geoFragmenter.getPrecision(req);
     const {
         minimum: minimumPrecision,
@@ -274,18 +330,70 @@ async function getPage(
         return;
     }
 
+    // define the aggregation periods
     const currentTime = new Date();
-    const fromTime = pageTimeFragmenter.getFromTime(req.query.page);
-    const lastPossibleTime = new Date();
-    const previousTime = pageTimeFragmenter.getPreviousTime(fromTime);
-    const nextTime = pageTimeFragmenter.getNextTime(fromTime);
-    const toTime = lastPossibleTime < nextTime ? lastPossibleTime : nextTime;
+    const fromTime = pageTimeFragmenter.getFromTime(req.query.page); // start of first aggregation period of this page
+    const nextTime = pageTimeFragmenter.getNextTime(fromTime); // same for the next page
+    const toTime = currentTime < nextTime ? currentTime : nextTime; // end of the last aggregation period of this page
 
+    // fetch the source data
     const focus = geoFragmenter.getFocusPoint(req);
     const path = geoFragmenter.getFragmentPath(focus, precision);
     const sourceData = await getSourceData(fromTime, toTime, `${SOURCE_URI}${path}`);
+
+    // aggregate the source data
     const buckets = selectBuckets(sourceData, fromTime, toTime, aggregateTimeFragmenter);
-    const aggregations = aggregate(sourceData, buckets, [
+    const aggregations = aggregate(sourceData, buckets, getAggregationFunctions());
+
+    // add metadata to the resulting data
+    const pagedData = wrapPage(
+        req,
+        sourceData,
+        aggregations,
+        pageTimeFragmenter,
+        geoFragmenter,
+        period,
+    );
+
+    addHeaders(res, toTime < currentTime);
+    res.status(200).send(pagedData);
+}
+
+function addHeaders(
+    res: Response, // the response object
+    stable?: boolean, // is the fragment considered to be stable?
+) {
+    res.type("application/ld+json; charset=utf-8");
+    if (stable) {
+        res.set("Cache-Control", `public, max-age=${60 * 60 * 24}`);
+    } else {
+        res.set("Cache-Control", "public, max-age=5");
+    }
+}
+
+export async function getSlippySummaryPage(req, res) {
+    const geoFragmenter = new SlippyFragmenter();
+    await getPage(req, res, geoFragmenter);
+}
+
+export async function getGeohashSummaryPage(req, res) {
+    const geoFragmenter = new GeohashFragmenter();
+    await getPage(req, res, geoFragmenter);
+}
+
+export async function getH3SummaryPage(req, res) {
+    const geoFragmenter = new H3Fragmenter();
+    await getPage(req, res, geoFragmenter);
+}
+
+/* Aggregation functions */
+interface IAggregationFunction {
+    function: (data: number[]) => number;
+    name: string;
+}
+
+function getAggregationFunctions(): IAggregationFunction[] {
+    return [
         {
             function: sum,
             name: "cot:Sum",
@@ -310,65 +418,7 @@ async function getPage(
             function: stddev,
             name: "cot:StdDev",
         },
-    ]);
-
-    const geoMetaData = geoFragmenter.getMetaData(focus, precision);
-
-    const children = [{
-        "@type": "tree:LesserThanRelation",
-        "tree:child": geoFragmenter.getSummaryFragmentURI(TARGET_URI, focus, precision, previousTime, period),
-    }];
-
-    if (new Date() > nextTime) {
-        children.push({
-            "@type": "tree:GreaterThanRelation",
-            "tree:child": geoFragmenter.getSummaryFragmentURI(TARGET_URI, focus, precision, nextTime, period),
-        });
-    }
-
-    const result = {
-        "@context": {
-            ...sourceData.context,
-            "prov": "http://www.w3.org/ns/prov#",
-            "cot": "https://w3id.org/cot/",
-            "cot:hasAggregationPeriod": {
-                "@type": "@id",
-            },
-            "cot:usingFunction": {
-                "@type": "@id",
-            },
-        },
-        "@id": geoFragmenter.getSummaryFragmentURI(TARGET_URI, focus, precision, fromTime, period),
-        "@type": "tree:Node",
-        ...geoMetaData,
-        "tree:childRelation": children,
-        "tree:value": {
-            "schema:startDate": fromTime.toISOString(),
-            "schema:endDate": nextTime.toISOString(),
-        },
-        "sh:path": "schema:startDate",
-        "dcterms:isPartOf": {
-            "@id": TARGET_URI,
-            "@type": "hydra:Collection",
-            "hydra:search": geoFragmenter.getSummarySearchTemplate(TARGET_URI),
-        },
-        "prov:wasDerivedFrom": sourceData.resourcesUsed,
-        "@graph": aggregations.map((element) => {
-            return wrapAggregation(element, period, geoMetaData);
-        }),
-    };
-
-    addHeaders(res, toTime < currentTime);
-    res.status(200).send(result);
-}
-
-function addHeaders(res, done?: boolean) {
-    res.type("application/ld+json; charset=utf-8");
-    if (done) {
-        res.set("Cache-Control", `public, max-age=${60 * 60 * 24}`);
-    } else {
-        res.set("Cache-Control", "public, max-age=5");
-    }
+    ];
 }
 
 function average(data) {
@@ -414,17 +464,29 @@ function sum(data): number {
     return data.reduce((a, b) => a + b, 0);
 }
 
-export async function getSlippySummaryPage(req, res) {
-    const geoFragmenter = new SlippyFragmenter();
-    await getPage(req, res, geoFragmenter);
+/*
+ * Placeholders
+ * There are probably libraries that automate the mutating of contexts
+ * Ideally these functions create and use a new vocabulary combining the original data and the derived view
+ */
+
+function extractVocubalary(data) {
+    return data["@context"][0];
 }
 
-export async function getGeohashSummaryPage(req, res) {
-    const geoFragmenter = new GeohashFragmenter();
-    await getPage(req, res, geoFragmenter);
-}
-
-export async function getH3SummaryPage(req, res) {
-    const geoFragmenter = new H3Fragmenter();
-    await getPage(req, res, geoFragmenter);
+function expandVocabulary(vocabulary) {
+    vocabulary["sosa:observedProperty"] = {
+        "@type": "@id",
+    };
+    vocabulary["sosa:madeBySensor"] = {
+        "@type": "@id",
+    };
+    vocabulary.prov = "http://www.w3.org/ns/prov#";
+    vocabulary.cot = "https://w3id.org/cot/";
+    vocabulary["cot:hasAggregationPeriod"] = {
+        "@type": "@id",
+    };
+    vocabulary["cot:usingFunction"] = {
+        "@type": "@id",
+    };
 }

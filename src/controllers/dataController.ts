@@ -53,7 +53,7 @@ function wrapPage(
             "schema:startDate": fromTime.toISOString(),
             "schema:endDate": nextTime.toISOString(),
         },
-        "sh:path": "observedAt",
+        "sh:path": "ngsi-ld:observedAt",
         "dcterms:isPartOf": {
             "@id": BASE_URI,
             "@type": "hydra:Collection",
@@ -179,6 +179,7 @@ function expandVocabulary(vocabulary) {
     targetContext["sh:path"] = {
         "@type": "@id",
     };
+    targetContext["ngsi-ld"] = "https://uri.etsi.org/ngsi-ld/";
 }
 
 function simplifyGraph(vocabulary, graph) {
