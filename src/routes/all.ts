@@ -1,7 +1,6 @@
 ﻿import express = require("express");
-import {
-    getGeohashLatest, getGeohashPage, getH3Latest, getH3Page, getSlippyLatest, getSlippyPage,
-} from "../controllers/dataController";
+import { getGeohashPage, getH3Page, getSlippyPage } from "../controllers/dataController";
+import { getGeohashLatest, getH3Latest, getSlippyLatest } from "../controllers/latestController";
 import { getGeohashSummaryPage, getH3SummaryPage, getSlippySummaryPage } from "../controllers/summaryController";
 
 const router = express.Router();

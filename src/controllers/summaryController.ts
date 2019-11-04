@@ -8,8 +8,8 @@ import H3Fragmenter from "../fragmenters/h3";
 import SlippyFragmenter from "../fragmenters/slippy";
 import TimeFragmenter from "../fragmenters/time";
 
-const HOURLY = "https://w3id.org/city_of_things#Hourly";
-const DAILY = "https://w3id.org/city_of_things#Daily";
+const HOURLY = "https://w3id.org/cot/Hourly";
+const DAILY = "https://w3id.org/cot/Daily";
 
 const SOURCE_URI = "http://localhost:3001";
 const TARGET_URI = "http://localhost:3001";
@@ -329,7 +329,8 @@ async function getPage(
     const result = {
         "@context": {
             ...sourceData.context,
-            "cot": "https://w3id.org/city_of_things#",
+            "prov": "http://www.w3.org/ns/prov#",
+            "cot": "https://w3id.org/cot/",
             "cot:hasAggregationPeriod": {
                 "@type": "@id",
             },

@@ -84,7 +84,7 @@ export default class SlippyFragmenter extends GeoFragmenter {
 
     public getDataSearchTemplate(baseUri: string) {
         return {
-            "@type": "hydraIriTemplate",
+            "@type": "hydra:IriTemplate",
             "hydra:template": `${baseUri}/{z}/{x}/{y}{?page}`,
             "hydra:variableRepresentation": "hydra:BasicRepresentation",
             "hydra:mapping": [
@@ -118,7 +118,7 @@ export default class SlippyFragmenter extends GeoFragmenter {
 
     public getSummarySearchTemplate(baseUri: string) {
         return {
-            "@type": "hydraIriTemplate",
+            "@type": "hydra:IriTemplate",
             "hydra:template": `${baseUri}/{z}/{x}/{y}/summary{?page,period}`,
             "hydra:variableRepresentation": "hydra:BasicRepresentation",
             "hydra:mapping": [
@@ -158,7 +158,7 @@ export default class SlippyFragmenter extends GeoFragmenter {
 
     public getLatestearchTemplate(baseUri: string) {
         return {
-            "@type": "hydraIriTemplate",
+            "@type": "hydra:IriTemplate",
             "hydra:template": `${baseUri}/{z}/{x}/{y}/latest`,
             "hydra:variableRepresentation": "hydra:BasicRepresentation",
             "hydra:mapping": [

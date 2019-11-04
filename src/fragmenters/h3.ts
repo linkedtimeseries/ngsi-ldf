@@ -22,6 +22,7 @@ export default class H3Fragmenter extends GeoFragmenter {
     }
 
     public getBBox(focus: ILocation, precision: number): ILocation[] {
+        // not a bounding box, but a hexagon
         const index = h3.geoToH3(focus.latitude, focus.longitude, precision);
         return h3.h3ToGeoBoundary(index, false).map((p) => {
             return {
@@ -49,7 +50,7 @@ export default class H3Fragmenter extends GeoFragmenter {
 
     public getDataSearchTemplate(baseUri: string) {
         return {
-            "@type": "hydraIriTemplate",
+            "@type": "hydra:IriTemplate",
             "hydra:template": `${baseUri}/h3/{index}{?page}`,
             "hydra:variableRepresentation": "hydra:BasicRepresentation",
             "hydra:mapping": [
@@ -71,7 +72,7 @@ export default class H3Fragmenter extends GeoFragmenter {
 
     public getSummarySearchTemplate(baseUri: string) {
         return {
-            "@type": "hydraIriTemplate",
+            "@type": "hydra:IriTemplate",
             "hydra:template": `${baseUri}/h3/{index}/summary{?page}`,
             "hydra:variableRepresentation": "hydra:BasicRepresentation",
             "hydra:mapping": [
@@ -93,7 +94,7 @@ export default class H3Fragmenter extends GeoFragmenter {
 
     public getLatestearchTemplate(baseUri: string) {
         return {
-            "@type": "hydraIriTemplate",
+            "@type": "hydra:IriTemplate",
             "hydra:template": `${baseUri}/h3/{index}/latest`,
             "hydra:variableRepresentation": "hydra:BasicRepresentation",
             "hydra:mapping": [
