@@ -35,17 +35,17 @@ function wrapPage(
         "tree:child": geoFragmenter.getDataFragmentURI(BASE_URI, focus, precision, previousTime),
     }];
 
-    let nextId: string;
     if (new Date() > nextTime) {
-        nextId = geoFragmenter.getDataFragmentURI(BASE_URI, focus, precision, nextTime);
+        children.push({
+            "@type": "tree:GreaterThanRelation",
+            "tree:child": geoFragmenter.getDataFragmentURI(BASE_URI, focus, precision, nextTime),
+        });
     } else {
-        nextId = geoFragmenter.getLatestFragmentURI(BASE_URI, focus, precision);
+        children.push({
+            "@type": "tree:AlternateViewRelation",
+            "tree:child": geoFragmenter.getLatestFragmentURI(BASE_URI, focus, precision),
+        });
     }
-
-    children.push({
-        "@type": "tree:GreaterThanRelation",
-        "tree:child": nextId,
-    });
 
     // build the fragment
     const result = {

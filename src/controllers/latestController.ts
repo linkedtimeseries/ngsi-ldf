@@ -26,7 +26,7 @@ function wrapLatest(
     simplifyGraph(vocabulary, data);
 
     const children = [{
-        "@type": "tree:LesserThanRelation",
+        "@type": "tree:AlternateViewRelation",
         "tree:child": geoFragmenter.getDataFragmentURI(BASE_URI, focus, precision),
     }];
 
@@ -145,6 +145,15 @@ function expandVocabulary(vocabulary) {
     targetContext["hydra:property"] = {
         "@type": "@id",
     };
+    targetContext["tree"] = "https://w3id.org/tree/terms#";
+    targetContext["tree:child"] = {
+        "@type": "@id",
+    };
+    targetContext["sh"] = "https://www.w3.org/ns/shacl#";
+    targetContext["sh:path"] = {
+        "@type": "@id",
+    };
+    targetContext["ngsi-ld"] = "https://uri.etsi.org/ngsi-ld/";
 }
 
 function simplifyGraph(vocabulary, graph) {
