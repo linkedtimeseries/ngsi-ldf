@@ -266,6 +266,13 @@ function wrapPage(
         });
     }
 
+    for (const resource of sourceData.resourcesUsed) {
+        children.push({
+            "@type": "tree:DerivedFromRelation",
+            "tree:child": resource,
+        });
+    }
+
     const context = sourceData.context;
     expandVocabulary(context);
 
@@ -286,7 +293,6 @@ function wrapPage(
             "@type": "hydra:Collection",
             "hydra:search": geoFragmenter.getSummarySearchTemplate(TARGET_URI),
         },
-        "prov:wasDerivedFrom": sourceData.resourcesUsed,
         "@graph": aggregatedData.map((element) => {
             return wrapAggregation(element, period, geoMetaData);
         }),
@@ -481,7 +487,6 @@ function expandVocabulary(vocabulary) {
     vocabulary["sosa:madeBySensor"] = {
         "@type": "@id",
     };
-    vocabulary.prov = "http://www.w3.org/ns/prov#";
     vocabulary.cot = "https://w3id.org/cot/";
     vocabulary["cot:hasAggregationPeriod"] = {
         "@type": "@id",
