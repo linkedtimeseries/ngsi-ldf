@@ -1,4 +1,5 @@
-﻿import cors = require("cors");
+﻿import compression = require("compression");
+import cors = require("cors");
 import debug = require("debug");
 import express = require("express");
 
@@ -6,8 +7,10 @@ import routes from "./routes/all";
 
 const app = express();
 
-app.options("*", cors());
-app.use(cors());
+app.use(compression()); // enable gzip
+
+app.options("*", cors()); // add cors to OPTIONS requests
+app.use(cors()); // add cors to GET requests
 
 app.use("/", routes);
 app.set("port", process.env.PORT || 3001);
