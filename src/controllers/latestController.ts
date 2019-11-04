@@ -13,7 +13,7 @@ const N = 100; // number of observations to fetch
 function wrapLatest(
     req: Request, // the original request
     data: object, // the converted data
-    time: Date, // when was this known to be the latest data
+    endDate: Date, // when was this known to be the latest data
     geoFragmenter: GeoFragmenter, // geospatial fragmentation strategy
 ) {
     // figure out which area this fragment covers
@@ -25,12 +25,22 @@ function wrapLatest(
     expandVocabulary(vocabulary);
     simplifyGraph(vocabulary, data);
 
+    const children = [{
+        "@type": "tree:LesserThanRelation",
+        "tree:child": geoFragmenter.getDataFragmentURI(BASE_URI, focus, precision),
+    }];
+
     // build the fragment
     const result = {
         "@context": vocabulary,
         "@id": geoFragmenter.getLatestFragmentURI(BASE_URI, focus, precision),
-        "schema:endDate": time.toISOString(),
+        "@type": "tree:Node",
         ...geoFragmenter.getMetaData(focus, precision),
+        "tree:childRelation": children,
+        "tree:value": {
+            "schema:endDate": endDate.toISOString(),
+        },
+        "sh:path": "ngsi-ld:observedAt",
         "dcterms:isPartOf": {
             "@id": BASE_URI,
             "@type": "hydra:Collection",

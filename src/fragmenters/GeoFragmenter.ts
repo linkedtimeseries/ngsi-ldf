@@ -32,10 +32,14 @@ export abstract class GeoFragmenter {
     public abstract getLatestearchTemplate(baseUri: string);
 
     /* Returns the paginated raw data URI */
-    public getDataFragmentURI(base: string, focus: ILocation, precision: number, time: Date) {
+    public getDataFragmentURI(base: string, focus: ILocation, precision: number, time?: Date) {
         const path = this.getFragmentPath(focus, precision);
         const geospatial = `${base}${path}`;
-        return `${geospatial}?page=${time.toISOString()}`;
+        if (time) {
+            return `${geospatial}?page=${time.toISOString()}`;
+        } else {
+            return geospatial;
+        }
     }
     /* Returns the latest data URI */
     public getLatestFragmentURI(base: string, focus: ILocation, precision: number) {
