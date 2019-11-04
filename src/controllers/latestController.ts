@@ -63,7 +63,7 @@ async function getLatest(
     const toTime = new Date();
 
     // figure out which area to request data for
-    // in geojson format
+    // Polygon in geojson format
     const focus = geoFragmenter.getFocusPoint(req);
     const bbox = [geoFragmenter.getBBox(focus, precision).map((location) => [location.longitude, location.latitude])];
 
@@ -74,22 +74,17 @@ async function getLatest(
     const data = await response.json();
 
     // add metadata to the resulting data
-    const pagedData = wrapLatest(req, data, toTime, geoFragmenter);
+    const wrappedData = wrapLatest(req, data, toTime, geoFragmenter);
 
-    addHeaders(res, false);
-    res.status(200).send(pagedData);
+    addHeaders(res);
+    res.status(200).send(wrappedData);
 }
 
 function addHeaders(
     res: Response, // response object to write the headers to
-    done?: boolean, // is this fragment 'finished'?
 ) {
     res.type("application/ld+json; charset=utf-8");
-    if (done) {
-        res.set("Cache-Control", `public, max-age=${60 * 60 * 24}`);
-    } else {
-        res.set("Cache-Control", "public, max-age=5");
-    }
+    res.set("Cache-Control", "public, max-age=5"); // cache for 5s
 }
 
 export async function getSlippyLatest(req, res) {
