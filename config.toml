@@ -9,9 +9,8 @@
   lastN = 100
 
 [data]
-  # Important to make the data semantically sound
-  # These are relative URIs used as properties in NGSI-LD
-  # Which in turn means they're considered relative to the active context
-  # Relative URIs used as objects in JSON-LD are considered relative to the base URI instead
-  # So we need to make them absolute ourselves when necessary
+  # NGSI-LD exclusively uses relative property URIs
+  # These are resolved using the active context
+  # Relative URIs used as objects (in JSON-LD) are considered relative to the base URI instead
+  # This is a list of such properties that need to be made absolute when needed
   metrics = ["NO2", "O3", "PM10", "PM1", "PM25"]
