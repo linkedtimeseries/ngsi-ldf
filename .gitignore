@@ -1,6 +1,7 @@
 lib
 obeliskLogin.json
 .vscode
+package-lock.json
 
 # Logs
 logs
