@@ -1,0 +1,17 @@
+[ngsi]
+  # Location of the NGSI-LD endpoint
+  host = "http://localhost:3000"
+
+[api]
+  # Base URI of the generated fragments
+  host = "http://localhost:3001"
+  # number of observations to include in the /latest fragments
+  lastN = 100
+
+[data]
+  # Important to make the data semantically sound
+  # These are relative URIs used as properties in NGSI-LD
+  # Which in turn means they're considered relative to the active context
+  # Relative URIs used as objects in JSON-LD are considered relative to the base URI instead
+  # So we need to make them absolute ourselves when necessary
+  metrics = ["NO2", "O3", "PM10", "PM1", "PM25"]

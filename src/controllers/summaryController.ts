@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import md5 = require("md5");
 
 import { getCached } from "../cache/cache";
+import { getConfig } from "../config/config";
 import { GeoFragmenter } from "../fragmenters/GeoFragmenter";
 import GeohashFragmenter from "../fragmenters/geohash";
 import H3Fragmenter from "../fragmenters/h3";
@@ -10,9 +11,6 @@ import TimeFragmenter from "../fragmenters/time";
 
 const HOURLY = "https://w3id.org/cot/Hourly";
 const DAILY = "https://w3id.org/cot/Daily";
-
-const SOURCE_URI = "http://localhost:3001";
-const TARGET_URI = "http://localhost:3001";
 
 /* Collection of all the fetched source data */
 interface ISourceData {
@@ -66,6 +64,7 @@ async function getSourceData(
     const graph: IObservation[] = [];
     let context = {};
     const resources = [];
+    const config = getConfig();
 
     // keep following links until we have all the required data
     let currentTime = fromTime;
@@ -80,7 +79,7 @@ async function getSourceData(
             const feature = element.featureOfInterest;
 
             // TODO; move to config
-            for (const metric of ["NO2", "O3", "PM10", "PM1", "PM25"]) {
+            for (const metric of config.metrics) {
                 if (!element[metric]) {
                     continue;
                 }
@@ -206,13 +205,15 @@ function aggregate(data: ISourceData, buckets: IBucket[], functions: IAggregatio
 
 /* Wraps a single aggregation value into a JSON-LD object */
 function wrapAggregation(
+    context: object, // used to make relative URIs absolute if used as object
     value: IAggregation, // the aggregation value
     period: string, // the aggregation period URI
     geoMetaData: object, // description of the geospatial region that's being aggregated
 ) {
     const result = {};
+    const config = getConfig();
     const hash = md5(JSON.stringify([value, geoMetaData])); // generate a (probably) unique ID
-    result["@id"] = `${TARGET_URI}/aggregation/${hash}`;
+    result["@id"] = `${config.targetURI}/aggregation/${hash}`;
     result["@type"] = "cot:Aggregation";
     result["cot:hasAggregationPeriod"] = period;
     result["cot:usingFunction"] = value.function;
@@ -226,7 +227,15 @@ function wrapAggregation(
     if (value.sensor) {
         result["sosa:madeBySensor"] = value.sensor;
     }
-    result["sosa:observedProperty"] = `cot:${value.observedProperty}`; // can't use relative URIs as objects
+
+    let property: string;
+    if (context[value.observedProperty]) {
+        // can't use relative URIs as objects
+        property = context[value.observedProperty];
+    } else {
+        property = value.observedProperty;
+    }
+    result["sosa:observedProperty"] = property;
 
     // TODO; would be cleaner with sosa:hasResult, qudt:hasNumericValue, and qudt:unit
     result["sosa:hasSimpleResult"] = value.value;
@@ -253,16 +262,18 @@ function wrapPage(
 
     const geoMetaData = geoFragmenter.getMetaData(focus, precision);
 
+    const config = getConfig();
+
     // add links to previous/next pages
     const children = [{
         "@type": "tree:LesserThanRelation",
-        "tree:child": geoFragmenter.getSummaryFragmentURI(TARGET_URI, focus, precision, previousTime, period),
+        "tree:child": geoFragmenter.getSummaryFragmentURI(config.targetURI, focus, precision, previousTime, period),
     }];
 
     if (new Date() > nextTime) {
         children.push({
             "@type": "tree:GreaterThanRelation",
-            "tree:child": geoFragmenter.getSummaryFragmentURI(TARGET_URI, focus, precision, nextTime, period),
+            "tree:child": geoFragmenter.getSummaryFragmentURI(config.targetURI, focus, precision, nextTime, period),
         });
     }
 
@@ -275,11 +286,19 @@ function wrapPage(
 
     const context = sourceData.context;
     expandVocabulary(context);
+    const graph = aggregatedData.map((element) => {
+        return wrapAggregation(context, element, period, geoMetaData);
+    });
+
+    for (const metric of config.metrics) {
+        // don't need these anymore
+        delete context[metric];
+    }
 
     // build the fragment
     const result = {
         "@context": context,
-        "@id": geoFragmenter.getSummaryFragmentURI(TARGET_URI, focus, precision, fromTime, period),
+        "@id": geoFragmenter.getSummaryFragmentURI(config.targetURI, focus, precision, fromTime, period),
         "@type": "tree:Node",
         ...geoMetaData,
         "tree:childRelation": children,
@@ -289,13 +308,11 @@ function wrapPage(
         },
         "sh:path": "schema:startDate",
         "dcterms:isPartOf": {
-            "@id": TARGET_URI,
+            "@id": config.targetURI,
             "@type": "hydra:Collection",
-            "hydra:search": geoFragmenter.getSummarySearchTemplate(TARGET_URI),
+            "hydra:search": geoFragmenter.getSummarySearchTemplate(config.targetURI),
         },
-        "@graph": aggregatedData.map((element) => {
-            return wrapAggregation(element, period, geoMetaData);
-        }),
+        "@graph": graph,
     };
 
     return result;
@@ -345,7 +362,8 @@ async function getPage(
     // fetch the source data
     const focus = geoFragmenter.getFocusPoint(req);
     const path = geoFragmenter.getFragmentPath(focus, precision);
-    const sourceData = await getSourceData(fromTime, toTime, `${SOURCE_URI}${path}`);
+    const config = getConfig();
+    const sourceData = await getSourceData(fromTime, toTime, `${config.targetURI}${path}`);
 
     // aggregate the source data
     const buckets = selectBuckets(sourceData, fromTime, toTime, aggregateTimeFragmenter);

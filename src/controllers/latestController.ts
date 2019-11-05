@@ -1,14 +1,12 @@
 import { Request, Response } from "express";
 import fetch = require("node-fetch");
+import { getConfig } from "../config/config";
 import { GeoFragmenter } from "../fragmenters/GeoFragmenter";
 import GeohashFragmenter from "../fragmenters/geohash";
 import H3Fragmenter from "../fragmenters/h3";
 import SlippyFragmenter from "../fragmenters/slippy";
 
 // tslint:disable: no-string-literal
-
-const BASE_URI = "http://localhost:3001";
-const N = 100; // number of observations to fetch
 
 function wrapLatest(
     req: Request, // the original request
@@ -25,15 +23,17 @@ function wrapLatest(
     expandVocabulary(vocabulary);
     simplifyGraph(vocabulary, data);
 
+    const config = getConfig();
+
     const children = [{
         "@type": "tree:AlternateViewRelation",
-        "tree:child": geoFragmenter.getDataFragmentURI(BASE_URI, focus, precision),
+        "tree:child": geoFragmenter.getDataFragmentURI(config.targetURI, focus, precision),
     }];
 
     // build the fragment
     const result = {
         "@context": vocabulary,
-        "@id": geoFragmenter.getLatestFragmentURI(BASE_URI, focus, precision),
+        "@id": geoFragmenter.getLatestFragmentURI(config.targetURI, focus, precision),
         "@type": "tree:Node",
         ...geoFragmenter.getMetaData(focus, precision),
         "tree:childRelation": children,
@@ -42,9 +42,9 @@ function wrapLatest(
         },
         "sh:path": "ngsi-ld:observedAt",
         "dcterms:isPartOf": {
-            "@id": BASE_URI,
+            "@id": config.targetURI,
             "@type": "hydra:Collection",
-            "hydra:search": geoFragmenter.getLatestearchTemplate(BASE_URI),
+            "hydra:search": geoFragmenter.getLatestearchTemplate(config.targetURI),
         },
         "@graph": data,
     };
@@ -77,9 +77,10 @@ async function getLatest(
     const focus = geoFragmenter.getFocusPoint(req);
     const bbox = [geoFragmenter.getBBox(focus, precision).map((location) => [location.longitude, location.latitude])];
 
-    const uri = "http://localhost:3000/temporal/entities?georel=within&geometry=Polygon&"
+    const config = getConfig();
+    const uri = `${config.sourceURI}/temporal/entities?georel=within&geometry=Polygon&`
         + `coordinates=${JSON.stringify(bbox)}&timerel=before`
-        + `&time=${toTime.toISOString()}&lastN=${N}`;
+        + `&time=${toTime.toISOString()}&lastN=${config.lastN}`;
     const response = await fetch(uri);
     const data = await response.json();
 

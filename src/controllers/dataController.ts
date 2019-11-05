@@ -1,5 +1,6 @@
 ﻿import { Request, Response } from "express";
 import fetch = require("node-fetch");
+import { getConfig } from "../config/config";
 import { GeoFragmenter } from "../fragmenters/GeoFragmenter";
 import GeohashFragmenter from "../fragmenters/geohash";
 import H3Fragmenter from "../fragmenters/h3";
@@ -7,7 +8,6 @@ import SlippyFragmenter from "../fragmenters/slippy";
 import TimeFragmenter from "../fragmenters/time";
 
 // tslint:disable: no-string-literal
-const BASE_URI = "http://localhost:3001";
 
 function wrapPage(
     req: Request, // the original request
@@ -29,28 +29,30 @@ function wrapPage(
     expandVocabulary(vocabulary);
     simplifyGraph(vocabulary, data);
 
+    const config = getConfig();
+
     // add links to previous/next pages
     const children = [{
         "@type": "tree:LesserThanRelation",
-        "tree:child": geoFragmenter.getDataFragmentURI(BASE_URI, focus, precision, previousTime),
+        "tree:child": geoFragmenter.getDataFragmentURI(config.targetURI, focus, precision, previousTime),
     }];
 
     if (new Date() > nextTime) {
         children.push({
             "@type": "tree:GreaterThanRelation",
-            "tree:child": geoFragmenter.getDataFragmentURI(BASE_URI, focus, precision, nextTime),
+            "tree:child": geoFragmenter.getDataFragmentURI(config.targetURI, focus, precision, nextTime),
         });
     } else {
         children.push({
             "@type": "tree:AlternateViewRelation",
-            "tree:child": geoFragmenter.getLatestFragmentURI(BASE_URI, focus, precision),
+            "tree:child": geoFragmenter.getLatestFragmentURI(config.targetURI, focus, precision),
         });
     }
 
     // build the fragment
     const result = {
         "@context": vocabulary,
-        "@id": geoFragmenter.getDataFragmentURI(BASE_URI, focus, precision, fromTime),
+        "@id": geoFragmenter.getDataFragmentURI(config.targetURI, focus, precision, fromTime),
         "@type": "tree:Node",
         ...geoFragmenter.getMetaData(focus, precision),
         "tree:childRelation": children,
@@ -60,9 +62,9 @@ function wrapPage(
         },
         "sh:path": "ngsi-ld:observedAt",
         "dcterms:isPartOf": {
-            "@id": BASE_URI,
+            "@id": config.targetURI,
             "@type": "hydra:Collection",
-            "hydra:search": geoFragmenter.getDataSearchTemplate(BASE_URI),
+            "hydra:search": geoFragmenter.getDataSearchTemplate(config.targetURI),
         },
         "@graph": data,
     };
@@ -97,7 +99,9 @@ async function getPage(
     const focus = geoFragmenter.getFocusPoint(req);
     const bbox = [geoFragmenter.getBBox(focus, precision).map((location) => [location.longitude, location.latitude])];
 
-    const uri = "http://localhost:3000/temporal/entities?georel=within&geometry=Polygon&"
+    const config = getConfig();
+
+    const uri = `${config.sourceURI}/temporal/entities?georel=within&geometry=Polygon&`
         + `coordinates=${JSON.stringify(bbox)}&timerel=between`
         + `&time=${fromTime.toISOString()}&endTime=${toTime.toISOString()}`;
     const response = await fetch(uri);
