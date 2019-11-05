@@ -52,25 +52,78 @@ See the [Uber blog](https://eng.uber.com/h3/) for more information.
 
 Observations that happen in the same time period can be placed in the same bucket. The default bucket size is 1 hour, which means that an observation that happened at `2019-11-05T15:36:00.000Z` can be found in the `2019-11-05T15:00:00.000Z` bucket.
 
-Temporal fragmentation are also used to aggregate data, in which case we can between the aggregation fragmentation (that is, computing the aggregation) and the one for the pagination (for the data publishing).  
+Temporal fragmentations are also used to aggregate data, in which case we can between the aggregation fragmentation (that is, computing the aggregation) and the one for the pagination (for the data publishing).  
 
 ## Interfaces
 
 ### Raw Data
 
-Looks like temporal NGSI-LD data
+The raw data interfaces adhere to any of these templates:
 
-#### Example
+* **Slippy**: `/{z}/{x}/{y}{?page}`
+* **Geohash**: `/geohash/{hash}{?page}`
+* **H3**: `/h3/{index}{?page}`
+
+Where `page` corresponds to a XSD DateTime string in UTC. If no page starts at the specified time, the page containing that time is returned instead. All other parameters are defined in the Geospatial Fragmentations section.
+
+The `@graph` element of the returned data contains the temporal representation of all entities in the specified area, following the NGSI-LD representation for 'Query Temporal Evolution of Entities' operations, with the exception that individuals don't (necessarily) contain their own contexts. This knowledge graph can be fed into NGSI-lD compatible clients. 
+
+General-purpose JSON-LD clients must be wary of the differences between JSON-LD and NGSI-LD though. For example, the `observedAt` property for example is a DateTime literal -- even though this is not formally defined as such in the NGSI-LD core context. 
 
 ### Latest
 
-Also looks like temporal NGSI-LD data
+The latest data interfaces adhere to any of these templates:
 
-#### Example
+- **Slippy**: `/{z}/{x}/{y}/latest`
+- **Geohash**: `/geohash/{hash}/latest`
+- **H3**: `/h3/{index}/latest`
+
+This interface returns raw data as well, and as such shares most of its properties with the raw data one. The difference is that this interface returns tiles that contain a fixed amount of observations -- instead of temporally fragmented pages. This is interface is more useful for application that are interested in real-time  data, as they can just periodically poll for new data. The raw data interface on the other hand is mostly useful for application that are looking for historical data.
+
+An additional subscription endpoint for real-time could also be useful, but is not implemented right now. It is not immediately clear with approach is the most scalable. And as always, both approaches aren't necessarily mutually exclusive. Fragments with recent data can be used to kickstart an application that will then subscribe for real-time data. 
 
 #### Aggregates
 
-Not NGSI-LD anymore because it's too entity-centric
+The aggregate (also called summary) data interfaces adhere to any of these templates:
+
+- **Slippy**: `/{z}/{x}/{y}/summary?{page,period}`
+- **Geohash**: `/geohash/{hash}/summary?{page,period}`
+- **H3**: `/h3/{index}/summary{?page,period}`
+
+Where `page` has the same meaning as in the raw data interface. `period` is a URI that signify aggregation windows. The currently supported values are `https://w3id.org/cot/Hourly` and `https://w3id.org/cot/Daily`. All other parameters are defined in the Geospatial Fragmentations section.
+
+This interface returns data using the [SSN](https://www.w3.org/TR/vocab-ssn/) ontology instead of valid NGSI-LD data. This is due to two reasons:
+
+* The NGSI-LD specification at the moment does not mention aggregates. This will likely change at some point, since NGSI v2 TSDB did support this.
+* NGSI-LD is very entity-focused, which makes some aggregations hard to express. The mean value of a metric in some region isn't a property of a single entity anymore. This assumes that fragment regions are not entities in the original NGSI-LD data, but this should be the case because the source data should be fragmentation agnostic. 
+
+## Hypermedia Controls
+
+#### Search Template
+
+hydra
+
+#### Traversal
+
+tree ontology
+
+Raw -> Raw
+
+Summary -> Summary
+
+------
+
+Summary -> Raw
+
+------
+
+Latest -> Raw
+
+Raw -> Latest
+
+## Data Examples
+
+
 
 ## Usage
 
@@ -94,30 +147,6 @@ The root directory contains a configuration file (`config.toml`) that contains t
   # This is a list of such properties that need to be made absolute when needed
   metrics = ["NO2", "O3", "PM10", "PM1", "PM25"]
 ```
-
-
-
-## Hypermedia controls
-
-#### Search Template
-
-hydra
-
-#### Traversal
-
-Raw -> Raw
-
-Summary -> Summary
-
----
-
-Summary -> Raw
-
----
-
-Latest -> Raw
-
-Raw -> Latest
 
 
 
