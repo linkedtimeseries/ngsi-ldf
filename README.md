@@ -12,6 +12,20 @@ This tool (conveniently named NGSI-LDF) tool republishes data from a given NGSI-
 
 Note that the tool itself is still rough around the edges, and the NGSI-LD specification is still evolving. While we believe it already goes a long way towards efficiently disclosing NGSI-LD data, it may not work for all use cases (yet).
 
+## Table of Contents
+
+* [Usage](#usage)
+* [Fragmentations](#fragmentations)
+  * [Geospatial Fragmentations](#geospatial-fragmentations)
+  * [Temporal Fragmentations](#temporal-fragmentations)
+* [Interfaces](#interfaces)
+* [Data Examples](#data-examples)
+* [Response Headers](#response-headers)
+* [Hypermedia Controls](#hypermedia-controls)
+  * [Search Template](#search-template)
+  * [Traversal](#traversal)
+* Equivalent Requests
+
 ## Usage
 
 This project is built using [Node.js](https://nodejs.org/en/) and [Express](http://expressjs.com/). Setting it up is as simple as cloning the repository and running `npm install` in the project root. The server can be started by running `npm start`. The default port is `3000` but this can be configured through an environment variable, for example: `PORT=8888 npm start`.
@@ -122,6 +136,31 @@ This interface returns data using the [SSN](https://www.w3.org/TR/vocab-ssn/) on
 * The NGSI-LD specification at the moment does not mention aggregates. This will likely change at some point, since NGSI v2 TSDB did support this.
 * NGSI-LD is very entity-focused, which makes some aggregations hard to express. The mean value of a metric in some region isn't a property of a single entity anymore. This assumes that fragment regions are not entities in the original NGSI-LD data, but this should be the case because the source data should be fragmentation agnostic. 
 
+## Data Examples
+
+The following data fragments were generated using air quality data from imec's [Bel-Air](https://www.imeccityofthings.be/en/projecten/bel-air) project, accessed through the [Obelisk](https://obelisk.ilabt.imec.be) platform.
+
+- Raw data:
+  - [/14/8393/5467](examples/raw_1.jsonld)
+  - [/14/8393/5467?page=2019-10-28T12:00:00.000Z](examples/raw_2.jsonld)
+  - [/geohash/u155kx](examples/raw_3.jsonld)
+  - [/h3/871fa4c5dffffff](examples/raw_4.jsonld)
+- Latest data:
+  - [/14/8393/5467/latest](examples/latest_1.jsonld)
+- Summary data:
+  - [/14/8393/5467/summary](examples/summary_1.jsonld)
+  - [/14/8393/5467/summary?page=2019-10-28T00:00:00.000Z](examples/summary_2.jsonld)
+  - [/14/8393/5467/summary?page=2019-10-24T00:00:00.000Z&period=https%3A%2F%2Fw3id.org%2Fcot%2FDaily](examples/summary_3.jsonld)
+
+## Response Headers
+
+The server's responses have 4 kinds of equally important headers:
+
+- Content type: `Content-Type: application/ld+json; charset=utf-8` so that data consumers can parse the data correctly.
+- [Cross Origin Resource Sharing (CORS)](https://enable-cors.org/): `Access-Control-Allow-Origin: *` allows requests from any source. This is essential to allow data consumers to actually consume the data. Note that the NGSI-LD core context does not have these headers (yet, presumably), you can use the [CORS Anywhere](https://cors-anywhere.herokuapp.com/) service in the meantime. 
+- Caching: `Cache-Control: public, max-age=86400` for stable data and `Cache-Control: public, max-age=5` for evolving data (such as the latest fragment). This means that stable data will be cached for 1 day, while evolving data will be cached for 5 seconds. 
+- Compression: `Content-Encoding: gzip` to further reduce bandwidth strain. The fragments tend to have good compression ratios: a 1 MB summary fragment is only 60 KB after compression. 
+
 ## Hypermedia Controls
 
 #### Search Template
@@ -172,34 +211,16 @@ In essence:
 * The active raw data page, that is the one that contains observations happening right now, is linked with the latest data fragment with `tree:AlternativeViewRelation` links.
 * The summary data pages refer to the raw data pages that were used to compute the aggregate values with `tree:DerivedFromRelation` links.
 
-## Data Examples
+## Equivalent NGSI-LD Requests
 
-The following data fragments were generated using air quality data from imec's [Bel-Air](https://www.imeccityofthings.be/en/projecten/bel-air) project, accessed through the [Obelisk](https://obelisk.ilabt.imec.be) platform.
+Incoming raw data or latest data requests get translated to NGSI-LD requests, the following table contains some examples:
 
-* Raw data:
-  * [/14/8393/5467](examples/raw_1.jsonld)
-  * [/14/8393/5467?page=2019-10-28T12:00:00.000Z](examples/raw_2.jsonld)
-  * [/geohash/u155kx](examples/raw_3.jsonld)
-  * [/h3/871fa4c5dffffff](examples/raw_4.jsonld)
-* Latest data:
-  * [/14/8393/5467/latest](examples/latest_1.jsonld)
-* Summary data:
-  * [/14/8393/5467/summary](examples/summary_1.jsonld)
-  * [/14/8393/5467/summary?page=2019-10-28T00:00:00.000Z](examples/summary_2.jsonld)
-  * [/14/8393/5467/summary?page=2019-10-24T00:00:00.000Z&period=https%3A%2F%2Fw3id.org%2Fcot%2FDaily](examples/summary_3.jsonld)
+|        | NGSI-LDF                                      | NGSI-LD                                                      |
+| ------ | --------------------------------------------- | ------------------------------------------------------------ |
+| Raw    | `/14/8393/5467?page=2019-11-06T15:00:00.000Z` | `/temporal/entities?georel=within&geometry=Polygon&coordinates=[[[4.41650390625,51.248163159055906],[4.41650390625,51.2344073516346],[4.4384765625,51.2344073516346],[4.4384765625,51.2344073516346]]]&timerel=between&time=2019-11-06T15:00:00.000Z&endTime=2019-11-06T16:00:00.000Z` |
+| Latest | `/14/8393/5467/latest`                        | `/temporal/entities?georel=within&geometry=Polygon&coordinates=[[[4.41650390625,51.248163159055906],[4.41650390625,51.2344073516346],[4.4384765625,51.2344073516346],[4.4384765625,51.2344073516346]]]&timerel=before&time=2019-11-06T16:04:43.640Z&lastN=100` |
 
-## Headers
-
-The server's responses have 4 kinds of equally important headers:
-
-* Content type: `application/ld+json; charset=utf-8` so that data consumers can parse the data correctly.
-* [Cross Origin Resource Sharing (CORS)](https://enable-cors.org/): `Access-Control-Allow-Origin: *` allows requests from any source. This is essential to allow data consumers to actually consume the data. Note that the NGSI-LD core context does not have these headers (yet, presumably), you can use the [CORS Anywhere](https://cors-anywhere.herokuapp.com/) service in the meantime. 
-* Caching: `Cache-Control: public, max-age=86400` for stable data and `Cache-Control: public, max-age=5` for evolving data (such as the latest fragment). This means that stable data will be cached for 1 day, while evolving data will be cached for 5 seconds. 
-* Compression: `Content-Encoding: gzip` to further reduce bandwidth strain. The fragments tend to have good compression ratios: a 1 MB summary fragment is only 60 KB after compression. 
+ 
 
 
-
-## Request Translations
-
-Equivalence of fragmentations and NGSI-LD parameters
 
