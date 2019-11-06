@@ -4,9 +4,9 @@ Suppose you want to know the median NOx value in your garden over the course of 
 
 Some queries simply require a lot of resources, and services have to spread these resources among all their users -- so something has to give. We propose to publish the data in the purest form possible, allowing data consumers to answer their own questions. The rationale being that slowly getting to an answer is better than not getting to an answer at all. Note that the two approaches aren't necessarily mutually exclusive; the ideal service combine both.
 
-At the same time, we have noticed that many data owners aren't opposed to sharing their data as long as it doesn't interfere with their actual operations. It should not require a lot of resources - both in the computational and the development effort points of view. NGSI-LD APIs do not (currently) meet these requirements. 
+At the same time, we have noticed that many data owners aren't opposed to sharing their data as long as it doesn't interfere with their actual operations. It should not require a lot of resources - both in the computational and the development effort points of view. 
 
-This tool (conveniently named NGSI-LDF) tool republishes data from a given NGSI-LD API as Linked Data Fragments (LDF). Each individual fragment is a read-only and cacheable partial view of the data, alleviating a  the main concerns from data owners. Data consumers can find the data they're looking for by either filling in search templates (described using the hydra vocabulary) or by traversing other fragments (described using the tree ontology).
+This tool (conveniently named NGSI-LDF) tool republishes data from a given NGSI-LD API as Linked Data Fragments (LDF). Each individual fragment is a read-only and cacheable partial view of the data, alleviating  the main concerns from data owners. Data consumers can find the data they're looking for by either filling in [search templates](#search-template) or by [traversing](#traversing) other fragments.
 
 ---
 
