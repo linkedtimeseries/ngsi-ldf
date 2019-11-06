@@ -6,7 +6,7 @@ Some queries simply require a lot of resources, and services have to spread thes
 
 At the same time, we have noticed that many data owners aren't opposed to sharing their data as long as it doesn't interfere with their actual operations. It should not require a lot of resources - both in the computational and the development effort points of view. 
 
-This tool (conveniently named NGSI-LDF) tool republishes data from a given NGSI-LD API as Linked Data Fragments (LDF). Each individual fragment is a read-only and cacheable partial view of the data, alleviating  the main concerns from data owners. Data consumers can find the data they're looking for by either filling in [search templates](#search-template) or by [traversing](#traversing) other fragments.
+This tool (conveniently named NGSI-LDF) tool republishes data from a given NGSI-LD API as Linked Data Fragments (LDF). Each individual fragment is a read-only and cacheable partial view of the data, alleviating  the main concerns from data owners. Data consumers can find the data they're looking for by either filling in [search templates](#search-template) or by [traversing](#traversal) other fragments.
 
 ---
 
