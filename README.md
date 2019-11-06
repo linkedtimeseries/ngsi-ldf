@@ -178,9 +178,9 @@ The following data fragments were generated using air quality data from imec's [
 
 * Raw data:
   * [/14/8393/5467](examples/raw_1.jsonld)
-  * http://localhost:3001/14/8393/5467?page=2019-10-28T12:00:00.000Z
-  * http://localhost:3001/geohash/u155kx
-  * http://localhost:3001/h3/871fa4c5dffffff
+  * [/14/8393/5467?page=2019-10-28T12:00:00.000Z](examples/raw_2.jsonld)
+  * [/geohash/u155kx](examples/raw_3.jsonld)
+  * [/h3/871fa4c5dffffff](examples/raw_4.jsonld)
 * Latest data:
   * http://localhost:3001/14/8393/5467/latest
 * Summary data:
