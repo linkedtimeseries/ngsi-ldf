@@ -16,7 +16,7 @@ export function getConfig(): IConfig {
             sourceURI: data.ngsi.host,
             targetURI: data.api.host,
             metrics: data.data.metrics,
-            lastN: data.data.lastN,
+            lastN: data.api.lastN,
         };
     }
 

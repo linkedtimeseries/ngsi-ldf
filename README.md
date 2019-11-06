@@ -188,14 +188,18 @@ The following data fragments were generated using air quality data from imec's [
   * [/14/8393/5467/summary?page=2019-10-28T00:00:00.000Z](examples/summary_2.jsonld)
   * [/14/8393/5467/summary?page=2019-10-24T00:00:00.000Z&period=https%3A%2F%2Fw3id.org%2Fcot%2FDaily](examples/summary_3.jsonld)
 
+## Headers
+
+The server's responses have 4 kinds of equally important headers:
+
+* Content type: `application/ld+json; charset=utf-8` so that data consumers can parse the data correctly.
+* [Cross Origin Resource Sharing (CORS)](https://enable-cors.org/): `Access-Control-Allow-Origin: *` allows requests from any source. This is essential to allow data consumers to actually consume the data. Note that the NGSI-LD core context does not have these headers (yet, presumably), you can use the [CORS Anywhere](https://cors-anywhere.herokuapp.com/) service in the meantime. 
+* Caching: `Cache-Control: public, max-age=86400` for stable data and `Cache-Control: public, max-age=5` for evolving data (such as the latest fragment). This means that stable data will be cached for 1 day, while evolving data will be cached for 5 seconds. 
+* Compression: `Content-Encoding: gzip` to further reduce bandwidth strain. The fragments tend to have good compression ratios: a 1 MB summary fragment is only 60 KB after compression. 
+
+
+
 ## Request Translations
 
 Equivalence of fragmentations and NGSI-LD parameters
 
-## Headers
-
-CORS - NGSI-LD context
-
-Cache
-
-Compression
