@@ -182,11 +182,11 @@ The following data fragments were generated using air quality data from imec's [
   * [/geohash/u155kx](examples/raw_3.jsonld)
   * [/h3/871fa4c5dffffff](examples/raw_4.jsonld)
 * Latest data:
-  * http://localhost:3001/14/8393/5467/latest
+  * [/14/8393/5467/latest](examples/latest_1.jsonld)
 * Summary data:
-  * http://localhost:3001/14/8393/5467/summary
-  * http://localhost:3001/14/8393/5467/summary?page=2019-10-28T00:00:00.000Z
-  * http://localhost:3001/14/8393/5467/summary?page=2019-10-28T00:00:00.000Z&period=https://w3id.org/cot/Daily
+  * [/14/8393/5467/summary](examples/summary_1.jsonld)
+  * [/14/8393/5467/summary?page=2019-10-28T00:00:00.000Z](examples/summary_2.jsonld)
+  * [/14/8393/5467/summary?page=2019-10-24T00:00:00.000Z&period=https%3A%2F%2Fw3id.org%2Fcot%2FDaily](examples/summary_3.jsonld)
 
 ## Request Translations
 
