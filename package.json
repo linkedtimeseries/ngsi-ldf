@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "node lib/app.js",
+    "start": "tsc && node lib/app.js",
     "build": "tsc -b",
     "lint": "./node_modules/tslint/bin/tslint --project ."
   },

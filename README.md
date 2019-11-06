@@ -12,6 +12,31 @@ This tool (conveniently named NGSI-LDF) tool republishes data from a given NGSI-
 
 Note that the tool itself is still rough around the edges, and the NGSI-LD specification is still evolving. While we believe it already goes a long way towards efficiently disclosing NGSI-LD data, it may not work for all use cases (yet).
 
+## Usage
+
+This project is built using [Node.js](https://nodejs.org/en/) and [Express](http://expressjs.com/). Setting it up is as simple as cloning the repository and running `npm install` in the project root. The server can be started by running `npm start`. The default port is `3000` but this can be configured through an environment variable, for example: `PORT=8888 npm start`.
+
+The root directory contains a configuration file (`config.toml`) that contains the other parameters. The default file contains comments detailing their purpose:
+
+```toml
+[ngsi]
+  # Location of the NGSI-LD endpoint
+  host = "http://localhost:3000"
+
+[api]
+  # Base URI of the generated fragments
+  host = "http://localhost:3001"
+  # number of observations to include in the /latest fragments
+  lastN = 100
+
+[data]
+  # NGSI-LD exclusively uses relative property URIs
+  # These are resolved using the active context
+  # Relative URIs used as objects (in JSON-LD) are considered relative to the base URI instead
+  # This is a list of such properties that need to be made absolute
+  metrics = ["NO2", "O3", "PM10", "PM1", "PM25"]
+```
+
 ## Fragmentations
 
 The fragmentation strategy ultimately determines the usability of the published Linked Data Fragments. Making them too granular eliminates the cacheability of the data, making them too course makes the data harder to ingest for consumers. Keeping this in mind, we currently support three common geospatial bucketing strategies and a flexible temporal fragmentation strategy.
@@ -148,31 +173,6 @@ In essence:
 * The summary data pages refer to the raw data pages that were used to compute the aggregate values with `tree:DerivedFromRelation` links.
 
 ## Data Examples
-
-
-
-## Usage
-
-The root directory contains a configuration file (`config.toml`) that contains the most important parameters. The default file contains comments detailing their purpose:
-
-```toml
-[ngsi]
-  # Location of the NGSI-LD endpoint
-  host = "http://localhost:3000"
-
-[api]
-  # Base URI of the generated fragments
-  host = "http://localhost:3001"
-  # number of observations to include in the /latest fragments
-  lastN = 100
-
-[data]
-  # NGSI-LD exclusively uses relative property URIs
-  # These are resolved using the active context
-  # Relative URIs used as objects (in JSON-LD) are considered relative to the base URI instead
-  # This is a list of such properties that need to be made absolute when needed
-  metrics = ["NO2", "O3", "PM10", "PM1", "PM25"]
-```
 
 
 
