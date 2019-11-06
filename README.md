@@ -137,7 +137,7 @@ The `hydra:template` property defines a URI template ([RFC 6570](https://tools.i
 
 Individual fragments are also linked together, so that data consumers can traverse them to get to their destination. The relationship between fragments is defined using the [tree](https://github.com/pietercolpaert/TreeOntology) vocabulary. Each fragment has a value in the tree: the time period it covers. The following image illustrates how the fragments are linked together:
 
-![tree](/home/hdelva/fragment-server/img/tree.svg)
+![tree](img/tree.svg)
 
 
 
