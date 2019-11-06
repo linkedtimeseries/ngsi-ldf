@@ -174,7 +174,19 @@ In essence:
 
 ## Data Examples
 
+The following data fragments were generated using air quality data from imec's [Bel-Air](https://www.imeccityofthings.be/en/projecten/bel-air) project, accessed through the [Obelisk](https://obelisk.ilabt.imec.be) platform.
 
+* Raw data:
+  * [/14/8393/5467](examples/raw_1.jsonld)
+  * http://localhost:3001/14/8393/5467?page=2019-10-28T12:00:00.000Z
+  * http://localhost:3001/geohash/u155kx
+  * http://localhost:3001/h3/871fa4c5dffffff
+* Latest data:
+  * http://localhost:3001/14/8393/5467/latest
+* Summary data:
+  * http://localhost:3001/14/8393/5467/summary
+  * http://localhost:3001/14/8393/5467/summary?page=2019-10-28T00:00:00.000Z
+  * http://localhost:3001/14/8393/5467/summary?page=2019-10-28T00:00:00.000Z&period=https://w3id.org/cot/Daily
 
 ## Request Translations
 
