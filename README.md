@@ -24,7 +24,7 @@ Note that the tool itself is still rough around the edges, and the NGSI-LD speci
 * [Hypermedia Controls](#hypermedia-controls)
   * [Search Template](#search-template)
   * [Traversal](#traversal)
-* Equivalent Requests
+* [Equivalent Requests](#equivalent-ngsi-ld-requests)
 
 ## Usage
 
