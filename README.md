@@ -101,25 +101,51 @@ This interface returns data using the [SSN](https://www.w3.org/TR/vocab-ssn/) on
 
 #### Search Template
 
-hydra
+Each fragment defines its own URI structure so that clients that know which other fragments they're looking for can simply fill in the template and arrive at their destination. This kind of hypermedia control is defined using the [hydra](https://www.hydra-cg.com/spec/latest/core/) vocabulary. For example, this is a possible search template for the aggregate data:
+
+```json
+"hydra:search": {
+  "@type": "hydra:IriTemplate",
+  "hydra:template": "http://localhost:3001/geohash/{hash}/summary{?page,period}",
+  "hydra:variableRepresentation": "hydra:BasicRepresentation",
+  "hydra:mapping": [
+    {
+      "@type": "hydra:IriTemplateMapping",
+      "hydra:variable": "hash",
+      "hydra:property": "tiles:geohash",
+      "hydra:required": true
+    },
+    {
+      "@type": "hydra:IriTemplateMapping",
+      "hydra:variable": "page",
+      "hydra:property": "schema:startDate",
+      "hydra:required": false
+    },
+    {
+      "@type": "hydra:IriTemplateMapping",
+      "hydra:variable": "period",
+      "hydra:property": "cot:hasAggregationPeriod",
+      "hydra:required": false
+    }
+  ]
+}
+```
+
+The `hydra:template` property defines a URI template ([RFC 6570](https://tools.ietf.org/html/rfc6570)), and the `hydra:mapping` describes which values have which role on the template. The `hydra:property` property describes the relationship between the requested fragment and the filled in value. 
 
 #### Traversal
 
-tree ontology
+Individual fragments are also linked together, so that data consumers can traverse them to get to their destination. The relationship between fragments is defined using the [tree](https://github.com/pietercolpaert/TreeOntology) vocabulary. Each fragment has a value in the tree: the time period it covers. The following image illustrates how the fragments are linked together:
 
-Raw -> Raw
+![tree](/home/hdelva/fragment-server/img/tree.svg)
 
-Summary -> Summary
 
-------
 
-Summary -> Raw
+In essence:
 
-------
-
-Latest -> Raw
-
-Raw -> Latest
+* Raw and summary data pages contain links to the next and previous pages (respectively using `tree:GreaterThanRelation` and `tree:LesserThanRelation` links).
+* The active raw data page, that is the one that contains observations happening right now, is linked with the latest data fragment with `tree:AlternativeViewRelation` links.
+* The summary data pages refer to the raw data pages that were used to compute the aggregate values with `tree:DerivedFromRelation` links.
 
 ## Data Examples
 

@@ -73,7 +73,7 @@ export default class H3Fragmenter extends GeoFragmenter {
     public getSummarySearchTemplate(baseUri: string) {
         return {
             "@type": "hydra:IriTemplate",
-            "hydra:template": `${baseUri}/h3/{index}/summary{?page}`,
+            "hydra:template": `${baseUri}/h3/{index}/summary{?page,period}`,
             "hydra:variableRepresentation": "hydra:BasicRepresentation",
             "hydra:mapping": [
                 {
@@ -86,6 +86,12 @@ export default class H3Fragmenter extends GeoFragmenter {
                     "@type": "hydra:IriTemplateMapping",
                     "hydra:variable": "page",
                     "hydra:property": "schema:startDate",
+                    "hydra:required": false,
+                },
+                {
+                    "@type": "hydra:IriTemplateMapping",
+                    "hydra:variable": "period",
+                    "hydra:property": "cot:hasAggregationPeriod",
                     "hydra:required": false,
                 },
             ],

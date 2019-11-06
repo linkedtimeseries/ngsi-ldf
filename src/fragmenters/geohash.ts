@@ -52,7 +52,7 @@ export default class GeohashFragmenter extends GeoFragmenter {
     public getSummarySearchTemplate(baseUri: string) {
         return {
             "@type": "hydra:IriTemplate",
-            "hydra:template": `${baseUri}/geohash/{hash}/summary{?page}`,
+            "hydra:template": `${baseUri}/geohash/{hash}/summary{?page,period}`,
             "hydra:variableRepresentation": "hydra:BasicRepresentation",
             "hydra:mapping": [
                 {
@@ -65,6 +65,12 @@ export default class GeohashFragmenter extends GeoFragmenter {
                     "@type": "hydra:IriTemplateMapping",
                     "hydra:variable": "page",
                     "hydra:property": "schema:startDate",
+                    "hydra:required": false,
+                },
+                {
+                    "@type": "hydra:IriTemplateMapping",
+                    "hydra:variable": "period",
+                    "hydra:property": "cot:hasAggregationPeriod",
                     "hydra:required": false,
                 },
             ],
