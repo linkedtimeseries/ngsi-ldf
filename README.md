@@ -73,7 +73,7 @@ Example functions to translate a WGS84 coordinate to a tile coordinate as well a
 
 #### Geohash
 
-Geohashes are commonly used to compactly store coordinates, but theyhttps://mail.google.com/mail/u/0/#inbox can also be used as a bucketing strategy. Essentially they are also based on quadtrees; element `0` covers the entire world and contains elements (ordered from top to bottom, left to right )`01` `11` `00` `10`. The resulting bit sequence is then encoded in base32 to obtain the actual geohash.  Fragments that use this fragmentation adhere to the following path template: `/geohash/{hash}` where:
+Geohashes are commonly used to compactly store coordinates, but they can also be used as a bucketing strategy. Essentially they are also based on quadtrees; element `0` covers the entire world and contains elements (ordered from top to bottom, left to right )`01` `11` `00` `10`. The resulting bit sequence is then encoded in base32 to obtain the actual geohash.  Fragments that use this fragmentation adhere to the following path template: `/geohash/{hash}` where:
 
 * `hash` is the geohash. The length of this hash is also called the geohash precision. We support precision values that lie in the interval [5, 6].
 
