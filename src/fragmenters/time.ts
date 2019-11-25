@@ -12,11 +12,19 @@ export default class TimeFragmenter {
     }
 
     /* Returns the start time of a fragment, given the time range the client requested */
-    public getFromTime(requestedPage: string): Date {
+    public getFromTime(requestedPage: string|Date): Date {
         let date: Date;
 
-        const requestedTime = Date.parse(decodeURIComponent(requestedPage));
-        if (!isNaN(requestedTime)) {
+        let requestedTime: number;
+        if (typeof requestedPage === "undefined") {
+            requestedTime = Date.now();
+        } else if (typeof requestedPage === "string") {
+            requestedTime = Date.parse(decodeURIComponent(requestedPage));
+        } else {
+            requestedTime = requestedPage.getTime();
+        }
+
+        if (requestedTime && !isNaN(requestedTime)) {
             date = new Date(requestedTime);
         } else {
             // the requested start time wasn't a valid date
@@ -38,5 +46,12 @@ export default class TimeFragmenter {
 
     public getNextTime(time: Date): Date {
         return new Date(time.getTime() + this.pageSize);
+    }
+
+    /* Get the fragment time range that contains a given time */
+    public getFragmentValue(time: Date): Date[] {
+        const fromTime = this.getFromTime(time);
+        const toTime = this.getNextTime(fromTime);
+        return [fromTime, toTime];
     }
 }
