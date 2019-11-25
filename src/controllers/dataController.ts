@@ -34,18 +34,33 @@ function wrapPage(
     // add links to previous/next pages
     const children = [{
         "@type": "tree:LesserThanRelation",
-        "tree:child": geoFragmenter.getDataFragmentURI(config.targetURI, focus, precision, previousTime),
+        "tree:node": geoFragmenter.getDataFragmentURI(config.targetURI, focus, precision, previousTime),
+        "sh:path": "ngsi-ld:observedAt",
+        "tree:value": {
+            "schema:startDate": previousTime.toISOString(),
+            "schema:endDate": fromTime.toISOString(),
+        },
     }];
 
     if (new Date() > nextTime) {
         children.push({
             "@type": "tree:GreaterThanRelation",
-            "tree:child": geoFragmenter.getDataFragmentURI(config.targetURI, focus, precision, nextTime),
+            "tree:node": geoFragmenter.getDataFragmentURI(config.targetURI, focus, precision, nextTime),
+            "sh:path": "ngsi-ld:observedAt",
+            "tree:value": {
+                "schema:startDate": nextTime.toISOString(),
+                "schema:endDate": timeFragmenter.getNextTime(nextTime).toISOString(),
+            },
         });
     } else {
         children.push({
             "@type": "tree:AlternateViewRelation",
-            "tree:child": geoFragmenter.getLatestFragmentURI(config.targetURI, focus, precision),
+            "tree:node": geoFragmenter.getLatestFragmentURI(config.targetURI, focus, precision),
+            "sh:path": "ngsi-ld:observedAt",
+            "tree:value": {
+                "schema:startDate": undefined,
+                "schema:endDate": new Date().toISOString(),
+            },
         });
     }
 
@@ -55,12 +70,12 @@ function wrapPage(
         "@id": geoFragmenter.getDataFragmentURI(config.targetURI, focus, precision, fromTime),
         "@type": "tree:Node",
         ...geoFragmenter.getMetaData(focus, precision),
-        "tree:childRelation": children,
+        "tree:relation": children,
+        "sh:path": "ngsi-ld:observedAt",
         "tree:value": {
             "schema:startDate": fromTime.toISOString(),
             "schema:endDate": nextTime.toISOString(),
         },
-        "sh:path": "ngsi-ld:observedAt",
         "dcterms:isPartOf": {
             "@id": config.targetURI,
             "@type": "hydra:Collection",
@@ -170,10 +185,17 @@ function expandVocabulary(vocabulary) {
         targetContext = vocabulary;
     }
 
+    targetContext["xsd"] = "http://www.w3.org/2001/XMLSchema#";
     targetContext["schema"] = "http://schema.org/";
+    targetContext["schema:startDate"] = {
+        "@type": "xsd:dateTime",
+    };
+    targetContext["schema:endDate"] = {
+        "@type": "xsd:dateTime",
+    };
     targetContext["dcterms"] = "http://purl.org/dc/terms/";
     targetContext["tree"] = "https://w3id.org/tree/terms#";
-    targetContext["tree:child"] = {
+    targetContext["tree:node"] = {
         "@type": "@id",
     };
     targetContext["tiles"] = "https://w3id.org/tree/terms#";

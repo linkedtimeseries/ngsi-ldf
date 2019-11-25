@@ -12,11 +12,18 @@ import TimeFragmenter from "../fragmenters/time";
 const HOURLY = "https://w3id.org/cot/Hourly";
 const DAILY = "https://w3id.org/cot/Daily";
 
+interface ISourcePage {
+    uri: string; // URI of the page
+    propertyPath: string; // property path of fragment's tree value
+    fromTime: string; // begin time of the source fragment
+    toTime: string; // end time of the source fragment
+}
+
 /* Collection of all the fetched source data */
 interface ISourceData {
     context: object; // json-ld context for all the data
     graph: IObservation[]; // knowledge graph of all the data
-    resourcesUsed: string[]; // original resources of all the data
+    resourcesUsed: ISourcePage[]; // original resources of all the data
 }
 
 /* The essential data of a single observation */
@@ -63,7 +70,7 @@ async function getSourceData(
 ): Promise<ISourceData> {
     const graph: IObservation[] = [];
     let context = {};
-    const resources = [];
+    const resources: ISourcePage[] = [];
     const config = getConfig();
 
     // keep following links until we have all the required data
@@ -73,7 +80,12 @@ async function getSourceData(
         const data = await getCached(uri);
 
         context = extractVocubalary(data);
-        resources.push(uri);
+        resources.push({
+            uri: data["@id"],
+            fromTime: data["tree:value"]["schema:startDate"],
+            toTime: data["tree:value"]["schema:endDate"],
+            propertyPath: data["sh:path"],
+        });
         for (const element of data["@graph"]) {
             const sensor = element.id;
             const feature = element.featureOfInterest;
@@ -267,20 +279,35 @@ function wrapPage(
     // add links to previous/next pages
     const children = [{
         "@type": "tree:LesserThanRelation",
-        "tree:child": geoFragmenter.getSummaryFragmentURI(config.targetURI, focus, precision, previousTime, period),
+        "tree:node": geoFragmenter.getSummaryFragmentURI(config.targetURI, focus, precision, previousTime, period),
+        "tree:value": {
+            "schema:startDate": previousTime.toISOString(),
+            "schema:endDate": fromTime.toISOString(),
+        },
+        "sh:path": "schema:startDate",
     }];
 
     if (new Date() > nextTime) {
         children.push({
             "@type": "tree:GreaterThanRelation",
-            "tree:child": geoFragmenter.getSummaryFragmentURI(config.targetURI, focus, precision, nextTime, period),
+            "tree:node": geoFragmenter.getSummaryFragmentURI(config.targetURI, focus, precision, nextTime, period),
+            "tree:value": {
+                "schema:startDate": fromTime.toISOString(),
+                "schema:endDate": nextTime.toISOString(),
+            },
+            "sh:path": "schema:startDate",
         });
     }
 
     for (const resource of sourceData.resourcesUsed) {
         children.push({
             "@type": "tree:DerivedFromRelation",
-            "tree:child": resource,
+            "tree:node": resource.uri,
+            "tree:value": {
+                "schema:startDate": resource.fromTime,
+                "schema:endDate": resource.toTime,
+            },
+            "sh:path": resource.propertyPath,
         });
     }
 
@@ -301,12 +328,7 @@ function wrapPage(
         "@id": geoFragmenter.getSummaryFragmentURI(config.targetURI, focus, precision, fromTime, period),
         "@type": "tree:Node",
         ...geoMetaData,
-        "tree:childRelation": children,
-        "tree:value": {
-            "schema:startDate": fromTime.toISOString(),
-            "schema:endDate": nextTime.toISOString(),
-        },
-        "sh:path": "schema:startDate",
+        "tree:relation": children,
         "dcterms:isPartOf": {
             "@id": config.targetURI,
             "@type": "hydra:Collection",

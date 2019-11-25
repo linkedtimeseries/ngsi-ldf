@@ -5,6 +5,7 @@ import { GeoFragmenter } from "../fragmenters/GeoFragmenter";
 import GeohashFragmenter from "../fragmenters/geohash";
 import H3Fragmenter from "../fragmenters/h3";
 import SlippyFragmenter from "../fragmenters/slippy";
+import TimeFragmenter from "../fragmenters/time";
 
 // tslint:disable: no-string-literal
 
@@ -25,9 +26,18 @@ function wrapLatest(
 
     const config = getConfig();
 
+    // todo, size of fragment should be configurable and consistent
+    const timeFragmenter = new TimeFragmenter(TimeFragmenter.HOUR);
+    const [beginTime, endTime] = timeFragmenter.getFragmentValue(endDate);
+
     const children = [{
         "@type": "tree:AlternateViewRelation",
-        "tree:child": geoFragmenter.getDataFragmentURI(config.targetURI, focus, precision),
+        "tree:node": geoFragmenter.getDataFragmentURI(config.targetURI, focus, precision, beginTime),
+        "sh:path": "ngsi-ld:observedAt",
+        "tree:value": {
+            "schema:startDate": beginTime.toISOString(),
+            "schema:endDate": endTime.toISOString(),
+        },
     }];
 
     // build the fragment
@@ -36,11 +46,11 @@ function wrapLatest(
         "@id": geoFragmenter.getLatestFragmentURI(config.targetURI, focus, precision),
         "@type": "tree:Node",
         ...geoFragmenter.getMetaData(focus, precision),
-        "tree:childRelation": children,
+        "tree:relation": children,
+        "sh:path": "ngsi-ld:observedAt",
         "tree:value": {
             "schema:endDate": endDate.toISOString(),
         },
-        "sh:path": "ngsi-ld:observedAt",
         "dcterms:isPartOf": {
             "@id": config.targetURI,
             "@type": "hydra:Collection",
@@ -136,7 +146,11 @@ function expandVocabulary(vocabulary) {
         targetContext = vocabulary;
     }
 
-    targetContext["schema"] = "http://schema.org/"; // for the endDate
+    targetContext["xsd"] = "http://www.w3.org/2001/XMLSchema#";
+    targetContext["schema"] = "http://schema.org/";
+    targetContext["schema:endDate"] = {
+        "@type": "xsd:dateTime",
+    };
     targetContext["dcterms"] = "http://purl.org/dc/terms/"; // to describe the dataset
     targetContext["tiles"] = "https://w3id.org/tree/terms#"; // for the fragmentations
     targetContext["hydra"] = "http://www.w3.org/ns/hydra/core#"; // for the hypermedia controls
@@ -147,7 +161,7 @@ function expandVocabulary(vocabulary) {
         "@type": "@id",
     };
     targetContext["tree"] = "https://w3id.org/tree/terms#";
-    targetContext["tree:child"] = {
+    targetContext["tree:node"] = {
         "@type": "@id",
     };
     targetContext["sh"] = "https://www.w3.org/ns/shacl#";
