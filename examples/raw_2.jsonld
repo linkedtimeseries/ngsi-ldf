@@ -13,10 +13,17 @@
       "PM10": "cot:PM10",
       "PM1": "cot:PM1",
       "PM25": "cot:PM25",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
       "schema": "http://schema.org/",
+      "schema:startDate": {
+        "@type": "xsd:dateTime"
+      },
+      "schema:endDate": {
+        "@type": "xsd:dateTime"
+      },
       "dcterms": "http://purl.org/dc/terms/",
       "tree": "https://w3id.org/tree/terms#",
-      "tree:child": {
+      "tree:node": {
         "@type": "@id"
       },
       "tiles": "https://w3id.org/tree/terms#",
@@ -40,21 +47,31 @@
   "tiles:zoom": 14,
   "tiles:longitudeTile": 8393,
   "tiles:latitudeTile": 5467,
-  "tree:childRelation": [
+  "tree:relation": [
     {
       "@type": "tree:LesserThanRelation",
-      "tree:child": "http://localhost:3001/14/8393/5467?page=2019-10-28T11:00:00.000Z"
+      "tree:node": "http://localhost:3001/14/8393/5467?page=2019-10-28T11:00:00.000Z",
+      "sh:path": "ngsi-ld:observedAt",
+      "tree:value": {
+        "schema:startDate": "2019-10-28T11:00:00.000Z",
+        "schema:endDate": "2019-10-28T12:00:00.000Z"
+      }
     },
     {
       "@type": "tree:GreaterThanRelation",
-      "tree:child": "http://localhost:3001/14/8393/5467?page=2019-10-28T13:00:00.000Z"
+      "tree:node": "http://localhost:3001/14/8393/5467?page=2019-10-28T13:00:00.000Z",
+      "sh:path": "ngsi-ld:observedAt",
+      "tree:value": {
+        "schema:startDate": "2019-10-28T13:00:00.000Z",
+        "schema:endDate": "2019-10-28T14:00:00.000Z"
+      }
     }
   ],
+  "sh:path": "ngsi-ld:observedAt",
   "tree:value": {
     "schema:startDate": "2019-10-28T12:00:00.000Z",
     "schema:endDate": "2019-10-28T13:00:00.000Z"
   },
-  "sh:path": "ngsi-ld:observedAt",
   "dcterms:isPartOf": {
     "@id": "http://localhost:3001",
     "@type": "hydra:Collection",

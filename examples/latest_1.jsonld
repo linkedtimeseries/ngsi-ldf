@@ -13,7 +13,11 @@
       "PM10": "cot:PM10",
       "PM1": "cot:PM1",
       "PM25": "cot:PM25",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
       "schema": "http://schema.org/",
+      "schema:endDate": {
+        "@type": "xsd:dateTime"
+      },
       "dcterms": "http://purl.org/dc/terms/",
       "tiles": "https://w3id.org/tree/terms#",
       "hydra": "http://www.w3.org/ns/hydra/core#",
@@ -24,7 +28,7 @@
         "@type": "@id"
       },
       "tree": "https://w3id.org/tree/terms#",
-      "tree:child": {
+      "tree:node": {
         "@type": "@id"
       },
       "sh": "https://www.w3.org/ns/shacl#",
@@ -40,16 +44,21 @@
   "tiles:zoom": 14,
   "tiles:longitudeTile": 8393,
   "tiles:latitudeTile": 5467,
-  "tree:childRelation": [
+  "tree:relation": [
     {
       "@type": "tree:AlternateViewRelation",
-      "tree:child": "http://localhost:3001/14/8393/5467"
+      "tree:node": "http://localhost:3001/14/8393/5467?page=2019-11-25T16:00:00.000Z",
+      "sh:path": "ngsi-ld:observedAt",
+      "tree:value": {
+        "schema:startDate": "2019-11-25T16:00:00.000Z",
+        "schema:endDate": "2019-11-25T17:00:00.000Z"
+      }
     }
   ],
-  "tree:value": {
-    "schema:endDate": "2019-11-06T16:04:43.640Z"
-  },
   "sh:path": "ngsi-ld:observedAt",
+  "tree:value": {
+    "schema:endDate": "2019-11-25T16:03:42.610Z"
+  },
   "dcterms:isPartOf": {
     "@id": "http://localhost:3001",
     "@type": "hydra:Collection",
@@ -81,7 +90,7 @@
   },
   "@graph": [
     {
-      "id": "http://example.org/lora.3432333852377918",
+      "id": "http://example.org/lora.3432333855378A18",
       "type": "Sensor",
       "hasFeatureOfInterest": {
         "type": "Relationship",
@@ -90,17 +99,136 @@
       "NO2": [
         {
           "type": "Property",
-          "value": 52.564491271972656,
+          "value": 84.42308807373047,
           "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:03:09.937Z",
-          "instanceId": "http://example.org/lora.3432333852377918/1573056189937#NO2",
+          "observedAt": "2019-11-25T16:03:38.428Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697818428#NO2",
           "location": {
             "type": "GeoProperty",
             "value": {
               "type": "Point",
               "coordinates": [
-                4.416506756097078,
-                51.237613605335355
+                4.417240675538778,
+                51.238468224182725
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 82.36344909667969,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T16:03:05.764Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697785764#NO2",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.417243022471666,
+                51.23847191222012
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 82.88931274414062,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T16:02:33.396Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697753396#NO2",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.41723832860589,
+                51.238468224182725
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 82.10051727294922,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T16:01:28.385Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697688385#NO2",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.417238663882017,
+                51.238468224182725
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 82.8235855102539,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T16:00:55.716Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697655716#NO2",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.417240675538778,
+                51.238464368507266
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 82.53874206542969,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T16:00:23.361Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697623361#NO2",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.4172426871955395,
+                51.238464368507266
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 84.53263854980469,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T15:59:50.738Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697590738#NO2",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.417244363576174,
+                51.238464368507266
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 84.92704010009766,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T15:59:18.370Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697558370#NO2",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.417243022471666,
+                51.238464368507266
               ]
             }
           }
@@ -109,17 +237,153 @@
       "O3": [
         {
           "type": "Property",
-          "value": 35.257,
+          "value": 34.591,
           "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:03:09.937Z",
-          "instanceId": "http://example.org/lora.3432333852377918/1573056189937#O3",
+          "observedAt": "2019-11-25T16:03:38.428Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697818428#O3",
           "location": {
             "type": "GeoProperty",
             "value": {
               "type": "Point",
               "coordinates": [
-                4.416506756097078,
-                51.237613605335355
+                4.417240675538778,
+                51.238468224182725
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 34.487,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T16:03:05.764Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697785764#O3",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.417243022471666,
+                51.23847191222012
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 34.859,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T16:02:33.396Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697753396#O3",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.41723832860589,
+                51.238468224182725
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 34.511,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T16:01:28.385Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697688385#O3",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.417238663882017,
+                51.238468224182725
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 34.477,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T16:00:55.716Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697655716#O3",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.417240675538778,
+                51.238464368507266
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 34.48,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T16:00:23.361Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697623361#O3",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.4172426871955395,
+                51.238464368507266
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 34.46,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T15:59:50.738Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697590738#O3",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.417244363576174,
+                51.238464368507266
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 34.567,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T15:59:18.370Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697558370#O3",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.417243022471666,
+                51.238464368507266
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 34.583,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T15:58:45.695Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697525695#O3",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.417239669710398,
+                51.23846051283181
               ]
             }
           }
@@ -128,17 +392,136 @@
       "PM10": [
         {
           "type": "Property",
-          "value": 4.105164527893066,
+          "value": 9.980561256408691,
           "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:03:09.937Z",
-          "instanceId": "http://example.org/lora.3432333852377918/1573056189937#PM10",
+          "observedAt": "2019-11-25T16:03:38.428Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697818428#PM10",
           "location": {
             "type": "GeoProperty",
             "value": {
               "type": "Point",
               "coordinates": [
-                4.416506756097078,
-                51.237613605335355
+                4.417240675538778,
+                51.238468224182725
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 3.149871826171875,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T16:03:05.764Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697785764#PM10",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.417243022471666,
+                51.23847191222012
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 3.149871826171875,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T16:02:33.396Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697753396#PM10",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.41723832860589,
+                51.238468224182725
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 2.770158052444458,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T16:01:28.385Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697688385#PM10",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.417238663882017,
+                51.238468224182725
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 2.045912742614746,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T16:00:55.716Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697655716#PM10",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.417240675538778,
+                51.238464368507266
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 2.045912742614746,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T16:00:23.361Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697623361#PM10",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.4172426871955395,
+                51.238464368507266
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 4.108230113983154,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T15:59:50.738Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697590738#PM10",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.417244363576174,
+                51.238464368507266
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 4.108230113983154,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T15:59:18.370Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697558370#PM10",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.417243022471666,
+                51.238464368507266
               ]
             }
           }
@@ -147,17 +530,153 @@
       "PM1": [
         {
           "type": "Property",
-          "value": 2.463876962661743,
+          "value": 3.7281033992767334,
           "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:03:09.937Z",
-          "instanceId": "http://example.org/lora.3432333852377918/1573056189937#PM1",
+          "observedAt": "2019-11-25T16:03:38.428Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697818428#PM1",
           "location": {
             "type": "GeoProperty",
             "value": {
               "type": "Point",
               "coordinates": [
-                4.416506756097078,
-                51.237613605335355
+                4.417240675538778,
+                51.238468224182725
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 2.5729820728302,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T16:03:05.764Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697785764#PM1",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.417243022471666,
+                51.23847191222012
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 2.5729820728302,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T16:02:33.396Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697753396#PM1",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.41723832860589,
+                51.238468224182725
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 2.411997079849243,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T16:01:28.385Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697688385#PM1",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.417238663882017,
+                51.238468224182725
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 1.7870677709579468,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T16:00:55.716Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697655716#PM1",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.417240675538778,
+                51.238464368507266
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 1.7870677709579468,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T16:00:23.361Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697623361#PM1",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.4172426871955395,
+                51.238464368507266
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 3.027836322784424,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T15:59:50.738Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697590738#PM1",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.417244363576174,
+                51.238464368507266
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 3.027836322784424,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T15:59:18.370Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697558370#PM1",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.417243022471666,
+                51.238464368507266
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 2.5612285137176514,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T15:58:45.695Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697525695#PM1",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.417239669710398,
+                51.23846051283181
               ]
             }
           }
@@ -166,17 +685,136 @@
       "PM25": [
         {
           "type": "Property",
-          "value": 3.58427357673645,
+          "value": 6.6095662117004395,
           "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:03:09.937Z",
-          "instanceId": "http://example.org/lora.3432333852377918/1573056189937#PM25",
+          "observedAt": "2019-11-25T16:03:38.428Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697818428#PM25",
           "location": {
             "type": "GeoProperty",
             "value": {
               "type": "Point",
               "coordinates": [
-                4.416506756097078,
-                51.237613605335355
+                4.417240675538778,
+                51.238468224182725
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 3.1188833713531494,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T16:03:05.764Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697785764#PM25",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.417243022471666,
+                51.23847191222012
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 3.1188833713531494,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T16:02:33.396Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697753396#PM25",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.41723832860589,
+                51.238468224182725
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 2.7666213512420654,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T16:01:28.385Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697688385#PM25",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.417238663882017,
+                51.238468224182725
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 2.036738634109497,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T16:00:55.716Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697655716#PM25",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.417240675538778,
+                51.238464368507266
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 2.036738634109497,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T16:00:23.361Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697623361#PM25",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.4172426871955395,
+                51.238464368507266
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 4.063388347625732,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T15:59:50.738Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697590738#PM25",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.417244363576174,
+                51.238464368507266
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 4.063388347625732,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T15:59:18.370Z",
+          "instanceId": "http://example.org/lora.3432333855378A18/1574697558370#PM25",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.417243022471666,
+                51.238464368507266
               ]
             }
           }
@@ -184,196 +822,113 @@
       ]
     },
     {
-      "id": "http://example.org/lora.3432333855376318",
+      "id": "http://example.org/lora.3432333863376118",
       "type": "Sensor",
       "hasFeatureOfInterest": {
         "type": "Relationship",
         "object": "http://example.org/AirQuality#Antwerp"
       },
+      "NO2": [
+        {
+          "type": "Property",
+          "value": 75.15473175048828,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T16:03:37.682Z",
+          "instanceId": "http://example.org/lora.3432333863376118/1574697817682#NO2",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.416582193225622,
+                51.237476309761405
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 76.60086059570312,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T16:03:05.300Z",
+          "instanceId": "http://example.org/lora.3432333863376118/1574697785300#NO2",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.416588898748159,
+                51.23744965530932
+              ]
+            }
+          }
+        },
+        {
+          "type": "Property",
+          "value": 77.06098937988281,
+          "unitCode": "GQ",
+          "observedAt": "2019-11-25T16:02:32.233Z",
+          "instanceId": "http://example.org/lora.3432333863376118/1574697752233#NO2",
+          "location": {
+            "type": "GeoProperty",
+            "value": {
+              "type": "Point",
+              "coordinates": [
+                4.416568782180548,
+                51.23746105469763
+              ]
+            }
+          }
+        }
+      ],
       "O3": [
         {
           "type": "Property",
-          "value": 35.216,
+          "value": 36.081,
           "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:04:17.395Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056257395#O3",
+          "observedAt": "2019-11-25T16:03:37.682Z",
+          "instanceId": "http://example.org/lora.3432333863376118/1574697817682#O3",
           "location": {
             "type": "GeoProperty",
             "value": {
               "type": "Point",
               "coordinates": [
-                4.41681420430541,
-                51.238960241898894
+                4.416582193225622,
+                51.237476309761405
               ]
             }
           }
         },
         {
           "type": "Property",
-          "value": 35.183,
+          "value": 36.409,
           "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:03:45.157Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056225157#O3",
+          "observedAt": "2019-11-25T16:03:05.300Z",
+          "instanceId": "http://example.org/lora.3432333863376118/1574697785300#O3",
           "location": {
             "type": "GeoProperty",
             "value": {
               "type": "Point",
               "coordinates": [
-                4.416812527924776,
-                51.238960241898894
+                4.416588898748159,
+                51.23744965530932
               ]
             }
           }
         },
         {
           "type": "Property",
-          "value": 35.108,
+          "value": 36.448,
           "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:03:12.056Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056192056#O3",
+          "observedAt": "2019-11-25T16:02:32.233Z",
+          "instanceId": "http://example.org/lora.3432333863376118/1574697752233#O3",
           "location": {
             "type": "GeoProperty",
             "value": {
               "type": "Point",
               "coordinates": [
-                4.416805151849985,
-                51.238960241898894
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 35.167,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:02:39.846Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056159846#O3",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.416803475469351,
-                51.238960241898894
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 35.25,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:02:07.187Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056127187#O3",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.416796769946814,
-                51.238956386223435
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 35.321,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:01:34.591Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056094591#O3",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.416795093566179,
-                51.238956386223435
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 35.293,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:01:02.074Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056062074#O3",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.416795764118433,
-                51.23894884251058
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 35.168,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:00:29.678Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056029678#O3",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.416795764118433,
-                51.23894884251058
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 35.077,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T15:59:56.963Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573055996963#O3",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.41679609939456,
-                51.23894113115966
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 35.191,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T15:59:24.350Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573055964350#O3",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.416795764118433,
-                51.23893744312227
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 35.233,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T15:58:51.842Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573055931842#O3",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.416792746633291,
-                51.23894113115966
+                4.416568782180548,
+                51.23746105469763
               ]
             }
           }
@@ -382,170 +937,51 @@
       "PM10": [
         {
           "type": "Property",
-          "value": 1.1582039594650269,
+          "value": 4.170029640197754,
           "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:04:17.395Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056257395#PM10",
+          "observedAt": "2019-11-25T16:03:37.682Z",
+          "instanceId": "http://example.org/lora.3432333863376118/1574697817682#PM10",
           "location": {
             "type": "GeoProperty",
             "value": {
               "type": "Point",
               "coordinates": [
-                4.41681420430541,
-                51.238960241898894
+                4.416582193225622,
+                51.237476309761405
               ]
             }
           }
         },
         {
           "type": "Property",
-          "value": 1.1582039594650269,
+          "value": 4.170029640197754,
           "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:03:45.157Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056225157#PM10",
+          "observedAt": "2019-11-25T16:03:05.300Z",
+          "instanceId": "http://example.org/lora.3432333863376118/1574697785300#PM10",
           "location": {
             "type": "GeoProperty",
             "value": {
               "type": "Point",
               "coordinates": [
-                4.416812527924776,
-                51.238960241898894
+                4.416588898748159,
+                51.23744965530932
               ]
             }
           }
         },
         {
           "type": "Property",
-          "value": 3.39607572555542,
+          "value": 4.373402118682861,
           "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:03:12.056Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056192056#PM10",
+          "observedAt": "2019-11-25T16:02:32.233Z",
+          "instanceId": "http://example.org/lora.3432333863376118/1574697752233#PM10",
           "location": {
             "type": "GeoProperty",
             "value": {
               "type": "Point",
               "coordinates": [
-                4.416805151849985,
-                51.238960241898894
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 3.39607572555542,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:02:39.846Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056159846#PM10",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.416803475469351,
-                51.238960241898894
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 1.9016814231872559,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:02:07.187Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056127187#PM10",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.416796769946814,
-                51.238956386223435
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 1.9016814231872559,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:01:34.591Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056094591#PM10",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.416795093566179,
-                51.238956386223435
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 2.7883949279785156,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:01:02.074Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056062074#PM10",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.416795764118433,
-                51.23894884251058
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 2.7883949279785156,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:00:29.678Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056029678#PM10",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.416795764118433,
-                51.23894884251058
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 2.8344552516937256,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T15:59:56.963Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573055996963#PM10",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.41679609939456,
-                51.23894113115966
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 2.8344552516937256,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T15:59:24.350Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573055964350#PM10",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.416795764118433,
-                51.23893744312227
+                4.416568782180548,
+                51.23746105469763
               ]
             }
           }
@@ -554,170 +990,51 @@
       "PM1": [
         {
           "type": "Property",
-          "value": 1.0479294061660767,
+          "value": 2.8738605976104736,
           "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:04:17.395Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056257395#PM1",
+          "observedAt": "2019-11-25T16:03:37.682Z",
+          "instanceId": "http://example.org/lora.3432333863376118/1574697817682#PM1",
           "location": {
             "type": "GeoProperty",
             "value": {
               "type": "Point",
               "coordinates": [
-                4.41681420430541,
-                51.238960241898894
+                4.416582193225622,
+                51.237476309761405
               ]
             }
           }
         },
         {
           "type": "Property",
-          "value": 1.0479294061660767,
+          "value": 2.8738605976104736,
           "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:03:45.157Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056225157#PM1",
+          "observedAt": "2019-11-25T16:03:05.300Z",
+          "instanceId": "http://example.org/lora.3432333863376118/1574697785300#PM1",
           "location": {
             "type": "GeoProperty",
             "value": {
               "type": "Point",
               "coordinates": [
-                4.416812527924776,
-                51.238960241898894
+                4.416588898748159,
+                51.23744965530932
               ]
             }
           }
         },
         {
           "type": "Property",
-          "value": 2.4875471591949463,
+          "value": 2.561950445175171,
           "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:03:12.056Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056192056#PM1",
+          "observedAt": "2019-11-25T16:02:32.233Z",
+          "instanceId": "http://example.org/lora.3432333863376118/1574697752233#PM1",
           "location": {
             "type": "GeoProperty",
             "value": {
               "type": "Point",
               "coordinates": [
-                4.416805151849985,
-                51.238960241898894
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 2.4875471591949463,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:02:39.846Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056159846#PM1",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.416803475469351,
-                51.238960241898894
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 1.4305214881896973,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:02:07.187Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056127187#PM1",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.416796769946814,
-                51.238956386223435
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 1.4305214881896973,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:01:34.591Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056094591#PM1",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.416795093566179,
-                51.238956386223435
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 2.245861291885376,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:01:02.074Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056062074#PM1",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.416795764118433,
-                51.23894884251058
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 2.245861291885376,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:00:29.678Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056029678#PM1",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.416795764118433,
-                51.23894884251058
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 1.9311847686767578,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T15:59:56.963Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573055996963#PM1",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.41679609939456,
-                51.23894113115966
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 1.9311847686767578,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T15:59:24.350Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573055964350#PM1",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.416795764118433,
-                51.23893744312227
+                4.416568782180548,
+                51.23746105469763
               ]
             }
           }
@@ -726,286 +1043,51 @@
       "PM25": [
         {
           "type": "Property",
-          "value": 1.1578704118728638,
+          "value": 4.113302707672119,
           "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:04:17.395Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056257395#PM25",
+          "observedAt": "2019-11-25T16:03:37.682Z",
+          "instanceId": "http://example.org/lora.3432333863376118/1574697817682#PM25",
           "location": {
             "type": "GeoProperty",
             "value": {
               "type": "Point",
               "coordinates": [
-                4.41681420430541,
-                51.238960241898894
+                4.416582193225622,
+                51.237476309761405
               ]
             }
           }
         },
         {
           "type": "Property",
-          "value": 1.1578704118728638,
+          "value": 4.113302707672119,
           "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:03:45.157Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056225157#PM25",
+          "observedAt": "2019-11-25T16:03:05.300Z",
+          "instanceId": "http://example.org/lora.3432333863376118/1574697785300#PM25",
           "location": {
             "type": "GeoProperty",
             "value": {
               "type": "Point",
               "coordinates": [
-                4.416812527924776,
-                51.238960241898894
+                4.416588898748159,
+                51.23744965530932
               ]
             }
           }
         },
         {
           "type": "Property",
-          "value": 3.374364137649536,
+          "value": 4.114958763122559,
           "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:03:12.056Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056192056#PM25",
+          "observedAt": "2019-11-25T16:02:32.233Z",
+          "instanceId": "http://example.org/lora.3432333863376118/1574697752233#PM25",
           "location": {
             "type": "GeoProperty",
             "value": {
               "type": "Point",
               "coordinates": [
-                4.416805151849985,
-                51.238960241898894
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 3.374364137649536,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:02:39.846Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056159846#PM25",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.416803475469351,
-                51.238960241898894
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 1.8903287649154663,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:02:07.187Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056127187#PM25",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.416796769946814,
-                51.238956386223435
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 1.8903287649154663,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:01:34.591Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056094591#PM25",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.416795093566179,
-                51.238956386223435
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 2.7768964767456055,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:01:02.074Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056062074#PM25",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.416795764118433,
-                51.23894884251058
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 2.7768964767456055,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:00:29.678Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573056029678#PM25",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.416795764118433,
-                51.23894884251058
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 2.6796889305114746,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T15:59:56.963Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573055996963#PM25",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.41679609939456,
-                51.23894113115966
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 2.6796889305114746,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T15:59:24.350Z",
-          "instanceId": "http://example.org/lora.3432333855376318/1573055964350#PM25",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.416795764118433,
-                51.23893744312227
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "id": "http://example.org/lora.3432333855378A18",
-      "type": "Sensor",
-      "hasFeatureOfInterest": {
-        "type": "Relationship",
-        "object": "http://example.org/AirQuality#Antwerp"
-      },
-      "O3": [
-        {
-          "type": "Property",
-          "value": 33.755,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:02:28.178Z",
-          "instanceId": "http://example.org/lora.3432333855378A18/1573056148178#O3",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.416706580668688,
-                51.23859412036836
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 33.842,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:01:55.858Z",
-          "instanceId": "http://example.org/lora.3432333855378A18/1573056115858#O3",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.4167655892670155,
-                51.23859412036836
-              ]
-            }
-          }
-        }
-      ],
-      "PM10": [
-        {
-          "type": "Property",
-          "value": 1.2275652885437012,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:02:28.178Z",
-          "instanceId": "http://example.org/lora.3432333855378A18/1573056148178#PM10",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.416706580668688,
-                51.23859412036836
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 3.373462677001953,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:01:55.858Z",
-          "instanceId": "http://example.org/lora.3432333855378A18/1573056115858#PM10",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.4167655892670155,
-                51.23859412036836
-              ]
-            }
-          }
-        }
-      ],
-      "PM25": [
-        {
-          "type": "Property",
-          "value": 1.227422833442688,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:02:28.178Z",
-          "instanceId": "http://example.org/lora.3432333855378A18/1573056148178#PM25",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.416706580668688,
-                51.23859412036836
-              ]
-            }
-          }
-        },
-        {
-          "type": "Property",
-          "value": 3.367325782775879,
-          "unitCode": "GQ",
-          "observedAt": "2019-11-06T16:01:55.858Z",
-          "instanceId": "http://example.org/lora.3432333855378A18/1573056115858#PM25",
-          "location": {
-            "type": "GeoProperty",
-            "value": {
-              "type": "Point",
-              "coordinates": [
-                4.4167655892670155,
-                51.23859412036836
+                4.416568782180548,
+                51.23746105469763
               ]
             }
           }

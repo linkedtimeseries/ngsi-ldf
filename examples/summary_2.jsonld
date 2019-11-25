@@ -7,10 +7,17 @@
     },
     "Sensor": "sosa:Sensor",
     "cot": "https://w3id.org/cot/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
     "schema": "http://schema.org/",
+    "schema:startDate": {
+      "@type": "xsd:dateTime"
+    },
+    "schema:endDate": {
+      "@type": "xsd:dateTime"
+    },
     "dcterms": "http://purl.org/dc/terms/",
     "tree": "https://w3id.org/tree/terms#",
-    "tree:child": {
+    "tree:node": {
       "@type": "@id"
     },
     "tiles": "https://w3id.org/tree/terms#",
@@ -44,45 +51,80 @@
   "tiles:zoom": 14,
   "tiles:longitudeTile": 8393,
   "tiles:latitudeTile": 5467,
-  "tree:childRelation": [
+  "tree:relation": [
     {
       "@type": "tree:LesserThanRelation",
-      "tree:child": "http://localhost:3001/14/8393/5467/summary?page=2019-10-27T18:00:00.000Z&period=https%3A%2F%2Fw3id.org%2Fcot%2FHourly"
+      "tree:node": "http://localhost:3001/14/8393/5467/summary?page=2019-10-27T18:00:00.000Z&period=https%3A%2F%2Fw3id.org%2Fcot%2FHourly",
+      "tree:value": {
+        "schema:startDate": "2019-10-27T18:00:00.000Z",
+        "schema:endDate": "2019-10-28T00:00:00.000Z"
+      },
+      "sh:path": "schema:startDate"
     },
     {
       "@type": "tree:GreaterThanRelation",
-      "tree:child": "http://localhost:3001/14/8393/5467/summary?page=2019-10-28T06:00:00.000Z&period=https%3A%2F%2Fw3id.org%2Fcot%2FHourly"
+      "tree:node": "http://localhost:3001/14/8393/5467/summary?page=2019-10-28T06:00:00.000Z&period=https%3A%2F%2Fw3id.org%2Fcot%2FHourly",
+      "tree:value": {
+        "schema:startDate": "2019-10-28T00:00:00.000Z",
+        "schema:endDate": "2019-10-28T06:00:00.000Z"
+      },
+      "sh:path": "schema:startDate"
     },
     {
       "@type": "tree:DerivedFromRelation",
-      "tree:child": "http://localhost:3001/14/8393/5467?page=2019-10-28T00:00:00.000Z"
+      "tree:node": "http://localhost:3001/14/8393/5467?page=2019-10-28T00:00:00.000Z",
+      "tree:value": {
+        "schema:startDate": "2019-10-28T00:00:00.000Z",
+        "schema:endDate": "2019-10-28T01:00:00.000Z"
+      },
+      "sh:path": "ngsi-ld:observedAt"
     },
     {
       "@type": "tree:DerivedFromRelation",
-      "tree:child": "http://localhost:3001/14/8393/5467?page=2019-10-28T01:00:00.000Z"
+      "tree:node": "http://localhost:3001/14/8393/5467?page=2019-10-28T01:00:00.000Z",
+      "tree:value": {
+        "schema:startDate": "2019-10-28T01:00:00.000Z",
+        "schema:endDate": "2019-10-28T02:00:00.000Z"
+      },
+      "sh:path": "ngsi-ld:observedAt"
     },
     {
       "@type": "tree:DerivedFromRelation",
-      "tree:child": "http://localhost:3001/14/8393/5467?page=2019-10-28T02:00:00.000Z"
+      "tree:node": "http://localhost:3001/14/8393/5467?page=2019-10-28T02:00:00.000Z",
+      "tree:value": {
+        "schema:startDate": "2019-10-28T02:00:00.000Z",
+        "schema:endDate": "2019-10-28T03:00:00.000Z"
+      },
+      "sh:path": "ngsi-ld:observedAt"
     },
     {
       "@type": "tree:DerivedFromRelation",
-      "tree:child": "http://localhost:3001/14/8393/5467?page=2019-10-28T03:00:00.000Z"
+      "tree:node": "http://localhost:3001/14/8393/5467?page=2019-10-28T03:00:00.000Z",
+      "tree:value": {
+        "schema:startDate": "2019-10-28T03:00:00.000Z",
+        "schema:endDate": "2019-10-28T04:00:00.000Z"
+      },
+      "sh:path": "ngsi-ld:observedAt"
     },
     {
       "@type": "tree:DerivedFromRelation",
-      "tree:child": "http://localhost:3001/14/8393/5467?page=2019-10-28T04:00:00.000Z"
+      "tree:node": "http://localhost:3001/14/8393/5467?page=2019-10-28T04:00:00.000Z",
+      "tree:value": {
+        "schema:startDate": "2019-10-28T04:00:00.000Z",
+        "schema:endDate": "2019-10-28T05:00:00.000Z"
+      },
+      "sh:path": "ngsi-ld:observedAt"
     },
     {
       "@type": "tree:DerivedFromRelation",
-      "tree:child": "http://localhost:3001/14/8393/5467?page=2019-10-28T05:00:00.000Z"
+      "tree:node": "http://localhost:3001/14/8393/5467?page=2019-10-28T05:00:00.000Z",
+      "tree:value": {
+        "schema:startDate": "2019-10-28T05:00:00.000Z",
+        "schema:endDate": "2019-10-28T06:00:00.000Z"
+      },
+      "sh:path": "ngsi-ld:observedAt"
     }
   ],
-  "tree:value": {
-    "schema:startDate": "2019-10-28T00:00:00.000Z",
-    "schema:endDate": "2019-10-28T06:00:00.000Z"
-  },
-  "sh:path": "schema:startDate",
   "dcterms:isPartOf": {
     "@id": "http://localhost:3001",
     "@type": "hydra:Collection",
