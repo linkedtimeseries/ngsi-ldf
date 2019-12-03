@@ -2,11 +2,11 @@
 
 Suppose you want to know the median NOx value in your garden over the course of last week, would you find a service giving you the answer you're looking for? What if you're looking for the 33% quantile, or you want to know the moving median, what then? Chances are that if you do find a suitable service, it'll either be plagued by stability issues, rate limiting restrictions, unpleasant pricing schemes, or all of the above. 
 
-Some queries simply require a lot of resources, and services have to spread these resources among all their users -- so something has to give. We propose to publish the data in the purest form possible, allowing data consumers to answer their own questions. The rationale being that slowly getting to an answer is better than not getting to an answer at all. Note that the two approaches aren't necessarily mutually exclusive; the ideal service combine both.
+Some queries simply require a lot of resources, and services have to spread these resources among all their users -- so something has to give. We propose to publish the data in the purest form possible, allowing data consumers to answer their own questions. The rationale being that slowly getting to an answer is better than not getting to an answer at all. Note that the two approaches aren't necessarily mutually exclusive; the ideal service combines both.
 
-At the same time, we have noticed that many data owners aren't opposed to sharing their data as long as it doesn't interfere with their actual operations. It should not require a lot of resources - both in the computational and the development effort points of view. 
+At the same time, we have noticed that many data owners aren't opposed to sharing their data as long as it doesn't interfere with their actual operations. This should not require a lot of resources - both in the computational and the development effort points of view. 
 
-This tool (conveniently named NGSI-LDF) tool republishes data from a given NGSI-LD API as Linked Data Fragments (LDF). Each individual fragment is a read-only and cacheable partial view of the data, alleviating  the main concerns from data owners. Data consumers can find the data they're looking for by either filling in [search templates](#search-template) or by [traversing](#traversal) other fragments.
+This tool (conveniently named NGSI-LDF) republishes data from a given NGSI-LD API as Linked Data Fragments (LDF). Each individual fragment is a read-only and cacheable partial view of the data, alleviating  the main concerns from data owners. Data consumers can find the data they are looking for by either filling in [search templates](#search-template) or by [traversing](#traversal) other fragments.
 
 ---
 
@@ -55,7 +55,7 @@ The root directory contains a configuration file (`config.toml`) that contains t
 
 The fragmentation strategy ultimately determines the usability of the published Linked Data Fragments. Making them too granular eliminates the cacheability of the data, making them too course makes the data harder to ingest for consumers. Keeping this in mind, we currently support three common geospatial bucketing strategies and a flexible temporal fragmentation strategy.
 
-All published data is fragmented geospatially, but not at all data is fragmented temporally. We call geospatial fragments _tiles_, and tiles that are also temporally fragmented _tile pages_ or simply _pages_.
+All published data is fragmented geospatially, but not all data is fragmented temporally. We call geospatial fragments _tiles_. Tiles that are also temporally fragmented are called _tile pages_ or simply _pages_.
 
 ### Geospatial Fragmentations
 
@@ -91,6 +91,7 @@ See the [Uber blog](https://eng.uber.com/h3/) for more information.
 
 Observations that happen in the same time period can be placed in the same bucket. The default bucket size is 1 hour, which means that an observation that happened at `2019-11-05T15:36:00.000Z` can be found in the `2019-11-05T15:00:00.000Z` bucket.
 
+[comment]: <> (This sentence is wrong - 'in which case we can ... ' what?)
 Temporal fragmentations are also used to aggregate data, in which case we can between the aggregation fragmentation (that is, computing the aggregation) and the one for the pagination (for the data publishing).  
 
 ## Interfaces
@@ -133,7 +134,7 @@ Where `page` has the same meaning as in the raw data interface. `period` is a UR
 
 This interface returns data using the [SSN](https://www.w3.org/TR/vocab-ssn/) ontology instead of valid NGSI-LD data. This is due to two reasons:
 
-* The NGSI-LD specification at the moment does not mention aggregates. This will likely change at some point, since NGSI v2 TSDB did support this.
+* The NGSI-LD specification at the moment does not mention aggregates. This will likely change at some point, since the NGSI-TSDB API did support this.
 * NGSI-LD is very entity-focused, which makes some aggregations hard to express. The mean value of a metric in some region isn't a property of a single entity anymore. This assumes that fragment regions are not entities in the original NGSI-LD data, but this should be the case because the source data should be fragmentation agnostic. 
 
 ## Data Examples
