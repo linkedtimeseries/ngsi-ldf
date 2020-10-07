@@ -1,3 +1,5 @@
+import * as QueryString from "qs";
+
 export default class TimeFragmenter {
     /* Some preset time ranges */
     public static readonly HOUR = 1000 * 60 * 60;
@@ -12,7 +14,7 @@ export default class TimeFragmenter {
     }
 
     /* Returns the start time of a fragment, given the time range the client requested */
-    public getFromTime(requestedPage: string|Date): Date {
+    public getFromTime(requestedPage: string | string[] | QueryString.ParsedQs | QueryString.ParsedQs[] | Date): Date {
         let date: Date;
 
         let requestedTime: number;
@@ -20,7 +22,7 @@ export default class TimeFragmenter {
             requestedTime = Date.now();
         } else if (typeof requestedPage === "string") {
             requestedTime = Date.parse(decodeURIComponent(requestedPage));
-        } else {
+        } else if (requestedPage instanceof Date) {
             requestedTime = requestedPage.getTime();
         }
 
