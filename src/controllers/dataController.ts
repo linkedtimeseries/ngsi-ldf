@@ -25,10 +25,9 @@ function wrapPage(
     const previousTime = timeFragmenter.getPreviousTime(fromTime);
 
     // adapt/use a new json-ld context
-    const vocabulary = extractVocubalary(data);
-    expandVocabulary(vocabulary);
-    simplifyGraph(vocabulary, data);
-
+    const vocabulary = extractVocabulary(data);
+    const expandedVocabulary = expandVocabulary(vocabulary);
+    simplifyGraph(expandedVocabulary, data);
     const config = getConfig();
 
     // add links to previous/next pages
@@ -66,7 +65,7 @@ function wrapPage(
 
     // build the fragment
     const result = {
-        "@context": vocabulary,
+        "@context": expandedVocabulary,
         "@id": geoFragmenter.getDataFragmentURI(config.targetURI, focus, precision, fromTime),
         "@type": "tree:Node",
         ...geoFragmenter.getMetaData(focus, precision),
@@ -81,7 +80,7 @@ function wrapPage(
             "@type": "hydra:Collection",
             "hydra:search": geoFragmenter.getDataSearchTemplate(config.targetURI),
         },
-        "@graph": data,
+        "@included": data,
     };
 
     return result;
@@ -114,11 +113,15 @@ async function getPage(
     const focus = geoFragmenter.getFocusPoint(req);
     const bbox = [geoFragmenter.getBBox(focus, precision).map((location) => [location.longitude, location.latitude])];
 
+    // type for NGSI-LD
+    const type = req.query.type;
+
     const config = getConfig();
 
-    const uri = `${config.sourceURI}/temporal/entities?georel=within&geometry=Polygon&`
+    const uri = `${config.sourceURI}/temporal/entities?type=${type}&georel=within&geometry=Polygon&`
         + `coordinates=${JSON.stringify(bbox)}&timerel=between`
-        + `&time=${fromTime.toISOString()}&endTime=${toTime.toISOString()}`;
+        + `&time=${fromTime.toISOString()}&endTime=${toTime.toISOString()}`
+        + `&timeproperty=modifiedAt&options=sysAttrs`;
     const response = await fetch(uri);
 
     // remember when the response arrived
@@ -168,54 +171,66 @@ export async function getH3Page(req, res) {
  * Ideally these functions create and use a new vocabulary combining the original data and the derived view
  */
 
-function extractVocubalary(data) {
+function extractVocabulary(data) {
     // fixme; simple placeholder
+    // when data is an array, pick context of first data object
     if (data && data.length) {
         return data[0]["@context"];
+    } else if (data["@context"]) {
+        return data["@context"];
     } else {
         return {};
     }
 }
 
 function expandVocabulary(vocabulary) {
-    let targetContext;
+    let targetContext = []; // context as array
     if (vocabulary && vocabulary.length) {
-        targetContext = vocabulary[0];
-    } else {
         targetContext = vocabulary;
+    } else {
+        targetContext.push(vocabulary);
     }
-
-    targetContext["xsd"] = "http://www.w3.org/2001/XMLSchema#";
-    targetContext["schema"] = "http://schema.org/";
-    targetContext["schema:startDate"] = {
+    const appendContext = {};
+    appendContext["xsd"] = "http://www.w3.org/2001/XMLSchema#";
+    appendContext["schema"] = "http://schema.org/";
+    appendContext["schema:startDate"] = {
         "@type": "xsd:dateTime",
     };
-    targetContext["schema:endDate"] = {
+    appendContext["schema:endDate"] = {
         "@type": "xsd:dateTime",
     };
-    targetContext["dcterms"] = "http://purl.org/dc/terms/";
-    targetContext["tree"] = "https://w3id.org/tree/terms#";
-    targetContext["tree:node"] = {
+    appendContext["dcterms"] = "http://purl.org/dc/terms/";
+    appendContext["tree"] = "https://w3id.org/tree/terms#";
+    appendContext["tree:node"] = {
         "@type": "@id",
     };
-    targetContext["tiles"] = "https://w3id.org/tree/terms#";
-    targetContext["hydra"] = "http://www.w3.org/ns/hydra/core#";
-    targetContext["hydra:variableRepresentation"] = {
+    appendContext["tiles"] = "https://w3id.org/tree/terms#";
+    appendContext["hydra"] = "http://www.w3.org/ns/hydra/core#";
+    appendContext["hydra:variableRepresentation"] = {
         "@type": "@id",
     };
-    targetContext["hydra:property"] = {
+    appendContext["hydra:property"] = {
         "@type": "@id",
     };
-    targetContext["sh"] = "https://www.w3.org/ns/shacl#";
-    targetContext["sh:path"] = {
+    appendContext["sh"] = "https://www.w3.org/ns/shacl#";
+    appendContext["sh:path"] = {
         "@type": "@id",
     };
-    targetContext["ngsi-ld"] = "https://uri.etsi.org/ngsi-ld/";
+    appendContext["ngsi-ld"] = "https://uri.etsi.org/ngsi-ld/";
+    targetContext.push(appendContext);
+    return targetContext;
 }
 
 function simplifyGraph(vocabulary, graph) {
+    // removing context from the graph entities
     // fixme; simple placeholder
-    for (const entity of graph) {
-        delete entity["@context"];
+    if (graph && graph.length) {
+        for (const entity of graph) {
+            if (entity["@context"]) {
+                delete entity["@context"];
+            }
+        }
+    } else if (graph["@context"]) {
+        delete graph["@context"];
     }
 }
