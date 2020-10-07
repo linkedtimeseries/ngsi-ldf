@@ -60,7 +60,7 @@ export default class SlippyFragmenter extends GeoFragmenter {
             { longitude: lon1, latitude: lat1 },
             { longitude: lon1, latitude: lat2 },
             { longitude: lon2, latitude: lat2 },
-            { longitude: lon2, latitude: lat2 },
+            { longitude: lon2, latitude: lat1 },
         ];
     }
 
