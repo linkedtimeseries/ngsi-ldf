@@ -6,12 +6,12 @@ import GeohashFragmenter from "../fragmenters/geohash";
 import H3Fragmenter from "../fragmenters/h3";
 import SlippyFragmenter from "../fragmenters/slippy";
 import TimeFragmenter from "../fragmenters/time";
+import {convertResponseToEventstream, expandVocabulary, extractVocabulary, simplifyGraph} from "../utils/Util";
 
-// tslint:disable: no-string-literal
-
-function wrapLatest(
+async function wrapLatest(
     req: Request, // the original request
     data: object, // the converted data
+    type: string,
     endDate: Date, // when was this known to be the latest data
     geoFragmenter: GeoFragmenter, // geospatial fragmentation strategy
 ) {
@@ -20,9 +20,9 @@ function wrapLatest(
     const precision = geoFragmenter.getPrecision(req);
 
     // adapt/use a new json-ld context
-    const vocabulary = extractVocubalary(data);
-    expandVocabulary(vocabulary);
-    simplifyGraph(vocabulary, data);
+    let vocabulary = extractVocabulary(data);
+    vocabulary = await expandVocabulary(vocabulary);
+    // simplifyGraph(vocabulary, data);
 
     const config = getConfig();
 
@@ -32,7 +32,7 @@ function wrapLatest(
 
     const children = [{
         "@type": "tree:AlternateViewRelation",
-        "tree:node": geoFragmenter.getDataFragmentURI(config.targetURI, focus, precision, beginTime),
+        "tree:node": geoFragmenter.getDataFragmentURI(config.targetURI, type, focus, precision, beginTime),
         "sh:path": "ngsi-ld:observedAt",
         "tree:value": {
             "schema:startDate": beginTime.toISOString(),
@@ -43,17 +43,17 @@ function wrapLatest(
     // build the fragment
     const result = {
         "@context": vocabulary,
-        "@id": geoFragmenter.getLatestFragmentURI(config.targetURI, focus, precision),
+        "@id": geoFragmenter.getLatestFragmentURI(config.targetURI, type, focus, precision),
         "@type": "tree:Node",
         ...geoFragmenter.getMetaData(focus, precision),
         "tree:relation": children,
-        "sh:path": "ngsi-ld:observedAt",
+        "tree:path": "ngsi-ld:observedAt",
         "tree:value": {
             "schema:endDate": endDate.toISOString(),
         },
         "dcterms:isPartOf": {
             "@id": config.targetURI,
-            "@type": "hydra:Collection",
+            "@type": "tree:Collection",
             "hydra:search": geoFragmenter.getLatestearchTemplate(config.targetURI),
         },
         "@graph": data,
@@ -79,6 +79,16 @@ async function getLatest(
         return;
     }
 
+    // type for NGSI-LD
+    if (!req.query.type) {
+        res.status(404).send("Provide \"type\" query parameter");
+        return;
+    }
+    const type = decodeURIComponent(req.query.type.toString());
+
+    const config = getConfig();
+
+    const fromTime = new Date(new Date().getTime() - config.lastNumberOfMinutes * 60 * 1000);
     // going to fetch the most recent observations up until NOW
     const toTime = new Date();
 
@@ -87,15 +97,16 @@ async function getLatest(
     const focus = geoFragmenter.getFocusPoint(req);
     const bbox = [geoFragmenter.getBBox(focus, precision).map((location) => [location.longitude, location.latitude])];
 
-    const config = getConfig();
-    const uri = `${config.sourceURI}/temporal/entities?georel=within&geometry=Polygon&`
-        + `coordinates=${JSON.stringify(bbox)}&timerel=before`
-        + `&time=${toTime.toISOString()}&lastN=${config.lastN}`;
+    const uri = `${config.sourceURI}/temporal/entities?type=${encodeURIComponent(type)}&georel=within&geometry=Polygon&`
+        + `coordinates=${JSON.stringify(bbox)}&timerel=between`
+        + `&time=${fromTime.toISOString()}&endTime=${toTime.toISOString()}`
+        + `&timeproperty=modifiedAt&options=sysAttrs`;
     const response = await fetch(uri);
-    const data = await response.json();
+    const responseJson = await response.json();
 
+    const data = await convertResponseToEventstream(responseJson, type, fromTime, toTime, bbox);
     // add metadata to the resulting data
-    const wrappedData = wrapLatest(req, data, toTime, geoFragmenter);
+    const wrappedData = await wrapLatest(req, data, type, toTime, geoFragmenter);
 
     addHeaders(res);
     res.status(200).send(wrappedData);
@@ -123,57 +134,3 @@ export async function getH3Latest(req, res) {
     await getLatest(req, res, geoFragmenter);
 }
 
-/*
- * Placeholders
- * There are probably libraries that automate the mutating of contexts
- * Ideally these functions create and use a new vocabulary combining the original data and the derived view
- */
-
-function extractVocubalary(data) {
-    // fixme; simple placeholder
-    if (data && data.length) {
-        return data[0]["@context"];
-    } else {
-        return {};
-    }
-}
-
-function expandVocabulary(vocabulary) {
-    let targetContext;
-    if (vocabulary && vocabulary.length) {
-        targetContext = vocabulary[0];
-    } else {
-        targetContext = vocabulary;
-    }
-
-    targetContext["xsd"] = "http://www.w3.org/2001/XMLSchema#";
-    targetContext["schema"] = "http://schema.org/";
-    targetContext["schema:endDate"] = {
-        "@type": "xsd:dateTime",
-    };
-    targetContext["dcterms"] = "http://purl.org/dc/terms/"; // to describe the dataset
-    targetContext["tiles"] = "https://w3id.org/tree/terms#"; // for the fragmentations
-    targetContext["hydra"] = "http://www.w3.org/ns/hydra/core#"; // for the hypermedia controls
-    targetContext["hydra:variableRepresentation"] = {
-        "@type": "@id",
-    };
-    targetContext["hydra:property"] = {
-        "@type": "@id",
-    };
-    targetContext["tree"] = "https://w3id.org/tree/terms#";
-    targetContext["tree:node"] = {
-        "@type": "@id",
-    };
-    targetContext["sh"] = "https://www.w3.org/ns/shacl#";
-    targetContext["sh:path"] = {
-        "@type": "@id",
-    };
-    targetContext["ngsi-ld"] = "https://uri.etsi.org/ngsi-ld/";
-}
-
-function simplifyGraph(vocabulary, graph) {
-    // fixme; simple placeholder
-    for (const entity of graph) {
-        delete entity["@context"];
-    }
-}

@@ -85,7 +85,7 @@ export default class SlippyFragmenter extends GeoFragmenter {
     public getDataSearchTemplate(baseUri: string) {
         return {
             "@type": "hydra:IriTemplate",
-            "hydra:template": `${baseUri}/{z}/{x}/{y}{?page}`,
+            "hydra:template": `${baseUri}/{z}/{x}/{y}{?type,page}`,
             "hydra:variableRepresentation": "hydra:BasicRepresentation",
             "hydra:mapping": [
                 {
@@ -108,10 +108,16 @@ export default class SlippyFragmenter extends GeoFragmenter {
                 },
                 {
                     "@type": "hydra:IriTemplateMapping",
+                    "hydra:variable": "type",
+                    "hydra:property": "rdf:type",
+                    "hydra:required": true,
+                },
+                {
+                    "@type": "hydra:IriTemplateMapping",
                     "hydra:variable": "page",
                     "hydra:property": "schema:startDate",
                     "hydra:required": false,
-                },
+                }
             ],
         };
     }
