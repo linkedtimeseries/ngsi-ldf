@@ -5,7 +5,8 @@ interface IConfig {
     sourceURI: string;
     targetURI: string;
     metrics: string[];
-    lastN: number;
+    lastNumberOfMinutes: number;
+    keyValues: boolean;
 }
 
 let config: IConfig;
@@ -16,7 +17,8 @@ export function getConfig(): IConfig {
             sourceURI: data.ngsi.host,
             targetURI: data.api.host,
             metrics: data.data.metrics,
-            lastN: data.api.lastN,
+            lastNumberOfMinutes: data.api.lastNumberOfMinutes,
+            keyValues: data.api.keyValues
         };
     }
 
