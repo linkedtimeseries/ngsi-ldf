@@ -61,7 +61,7 @@ function getModifiedAtsFromResponse(responseJson: any): any[] {
     return modifiedAts;
 }
 
-function convertToEventStream(data: any[]) {
+function convertToEventStream(data: any[], type: string) {
     const config = getConfig();
 
     for (const d in data) {
@@ -69,7 +69,7 @@ function convertToEventStream(data: any[]) {
         // create version URI
         data[d].id += "/" + new Date(data[d].modifiedAt).toISOString();
         data[d]["prov:generatedAtTime"] = new Date(data[d].modifiedAt).toISOString();
-        data[d].memberOf = config.targetURI;
+        data[d].memberOf = `${config.targetURI}/${encodeURIComponent(type)}`;
     }
     return data;
 }
@@ -106,7 +106,7 @@ export async function convertResponseToEventstream(responseJson: object, type: s
             }
         }
     }
-    return convertToEventStream(data);
+    return convertToEventStream(data, type);
 }
 
 export async function expandVocabulary(vocabulary) {

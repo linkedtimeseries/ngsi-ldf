@@ -77,7 +77,7 @@ async function wrapPage(
             "schema:endDate": nextTime.toISOString(),
         },
         "dcterms:isPartOf": {
-            "@id": config.targetURI,
+            "@id": `${config.targetURI}/${encodeURIComponent(type)}`,
             "@type": "tree:Collection",
             "hydra:search": geoFragmenter.getDataSearchTemplate(config.targetURI),
         },
