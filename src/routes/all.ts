@@ -5,10 +5,10 @@ import { getGeohashSummaryPage, getH3SummaryPage, getSlippySummaryPage } from ".
 
 const router = express.Router();
 
-router.get("/:zoom/:tile_x/:tile_y/summary", getSlippySummaryPage);
-router.get("/geohash/:hash/summary", getGeohashSummaryPage);
-router.get("/h3/:index/summary", getH3SummaryPage);
-
+// router.get("/:zoom/:tile_x/:tile_y/summary", getSlippySummaryPage);
+// router.get("/geohash/:hash/summary", getGeohashSummaryPage);
+// router.get("/h3/:index/summary", getH3SummaryPage);
+//
 router.get("/:zoom/:tile_x/:tile_y/latest", getSlippyLatest);
 router.get("/geohash/:hash/latest", getGeohashLatest);
 router.get("/h3/:index/latest", getH3Latest);

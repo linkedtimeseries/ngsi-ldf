@@ -6,12 +6,12 @@ import GeohashFragmenter from "../fragmenters/geohash";
 import H3Fragmenter from "../fragmenters/h3";
 import SlippyFragmenter from "../fragmenters/slippy";
 import TimeFragmenter from "../fragmenters/time";
+import {convertResponseToEventstream, expandVocabulary, extractVocabulary, simplifyGraph} from "../utils/Util";
 
-// tslint:disable: no-string-literal
-
-function wrapPage(
+async function wrapPage(
     req: Request, // the original request
     data: object, // the converted data
+    type: string, // the type of objects
     timeFragmenter: TimeFragmenter, // temporal fragmentation strategy
     geoFragmenter: GeoFragmenter, // geospatial fragmentation strategy
 ) {
@@ -25,17 +25,17 @@ function wrapPage(
     const previousTime = timeFragmenter.getPreviousTime(fromTime);
 
     // adapt/use a new json-ld context
-    const vocabulary = extractVocubalary(data);
-    expandVocabulary(vocabulary);
-    simplifyGraph(vocabulary, data);
+    let vocabulary = extractVocabulary(data);
+    vocabulary = await expandVocabulary(vocabulary);
+    // simplifyGraph(expandedVocabulary, data);
 
     const config = getConfig();
 
     // add links to previous/next pages
     const children = [{
-        "@type": "tree:LesserThanRelation",
-        "tree:node": geoFragmenter.getDataFragmentURI(config.targetURI, focus, precision, previousTime),
-        "sh:path": "ngsi-ld:observedAt",
+        "@type": "tree:LessThanRelation",
+        "tree:node": geoFragmenter.getDataFragmentURI(config.targetURI, type, focus, precision, previousTime),
+        "tree:path": "ngsi-ld:modifiedAt",
         "tree:value": {
             "schema:startDate": previousTime.toISOString(),
             "schema:endDate": fromTime.toISOString(),
@@ -45,8 +45,8 @@ function wrapPage(
     if (new Date() > nextTime) {
         children.push({
             "@type": "tree:GreaterThanRelation",
-            "tree:node": geoFragmenter.getDataFragmentURI(config.targetURI, focus, precision, nextTime),
-            "sh:path": "ngsi-ld:observedAt",
+            "tree:node": geoFragmenter.getDataFragmentURI(config.targetURI, type, focus, precision, nextTime),
+            "tree:path": "ngsi-ld:modifiedAt",
             "tree:value": {
                 "schema:startDate": nextTime.toISOString(),
                 "schema:endDate": timeFragmenter.getNextTime(nextTime).toISOString(),
@@ -55,8 +55,8 @@ function wrapPage(
     } else {
         children.push({
             "@type": "tree:AlternateViewRelation",
-            "tree:node": geoFragmenter.getLatestFragmentURI(config.targetURI, focus, precision),
-            "sh:path": "ngsi-ld:observedAt",
+            "tree:node": geoFragmenter.getLatestFragmentURI(config.targetURI, type, focus, precision),
+            "tree:path": "ngsi-ld:modifiedAt",
             "tree:value": {
                 "schema:startDate": undefined,
                 "schema:endDate": new Date().toISOString(),
@@ -67,21 +67,21 @@ function wrapPage(
     // build the fragment
     const result = {
         "@context": vocabulary,
-        "@id": geoFragmenter.getDataFragmentURI(config.targetURI, focus, precision, fromTime),
+        "@id": geoFragmenter.getDataFragmentURI(config.targetURI, type, focus, precision, fromTime),
         "@type": "tree:Node",
         ...geoFragmenter.getMetaData(focus, precision),
         "tree:relation": children,
-        "sh:path": "ngsi-ld:observedAt",
+        "tree:path": "ngsi-ld:modifiedAt",
         "tree:value": {
             "schema:startDate": fromTime.toISOString(),
             "schema:endDate": nextTime.toISOString(),
         },
         "dcterms:isPartOf": {
-            "@id": config.targetURI,
-            "@type": "hydra:Collection",
+            "@id": `${config.targetURI}/${encodeURIComponent(type)}`,
+            "@type": "tree:Collection",
             "hydra:search": geoFragmenter.getDataSearchTemplate(config.targetURI),
         },
-        "@graph": data,
+        "@included": data,
     };
 
     return result;
@@ -114,19 +114,29 @@ async function getPage(
     const focus = geoFragmenter.getFocusPoint(req);
     const bbox = [geoFragmenter.getBBox(focus, precision).map((location) => [location.longitude, location.latitude])];
 
+    // type for NGSI-LD
+    if (!req.query.type) {
+        res.status(404).send("Provide \"type\" query parameter");
+        return;
+    }
+    const type = decodeURIComponent(req.query.type.toString());
+
     const config = getConfig();
 
-    const uri = `${config.sourceURI}/temporal/entities?georel=within&geometry=Polygon&`
+    const uri = `${config.sourceURI}/temporal/entities?type=${encodeURIComponent(type)}&georel=within&geometry=Polygon&`
         + `coordinates=${JSON.stringify(bbox)}&timerel=between`
-        + `&time=${fromTime.toISOString()}&endTime=${toTime.toISOString()}`;
+        + `&time=${fromTime.toISOString()}&endTime=${toTime.toISOString()}`
+        + `&timeproperty=modifiedAt&options=sysAttrs`;
     const response = await fetch(uri);
 
     // remember when the response arrived
     const dataTime = new Date();
-    const data = await response.json();
+    const responseJson = await response.json();
+
+    const data = await convertResponseToEventstream(responseJson, type, fromTime, toTime, bbox);
 
     // add metadata to the resulting data
-    const pagedData = wrapPage(req, data, timeFragmenter, geoFragmenter);
+    const pagedData = await wrapPage(req, data, type, timeFragmenter, geoFragmenter);
 
     // fragment is presumed stable if the 'toTime' lies in the past
     addHeaders(res, toTime < dataTime);
@@ -160,62 +170,4 @@ export async function getGeohashPage(req, res) {
 export async function getH3Page(req, res) {
     const geoFragmenter = new H3Fragmenter();
     await getPage(req, res, new TimeFragmenter(TimeFragmenter.HOUR), geoFragmenter);
-}
-
-/*
- * Placeholders
- * There are probably libraries that automate the mutating of contexts
- * Ideally these functions create and use a new vocabulary combining the original data and the derived view
- */
-
-function extractVocubalary(data) {
-    // fixme; simple placeholder
-    if (data && data.length) {
-        return data[0]["@context"];
-    } else {
-        return {};
-    }
-}
-
-function expandVocabulary(vocabulary) {
-    let targetContext;
-    if (vocabulary && vocabulary.length) {
-        targetContext = vocabulary[0];
-    } else {
-        targetContext = vocabulary;
-    }
-
-    targetContext["xsd"] = "http://www.w3.org/2001/XMLSchema#";
-    targetContext["schema"] = "http://schema.org/";
-    targetContext["schema:startDate"] = {
-        "@type": "xsd:dateTime",
-    };
-    targetContext["schema:endDate"] = {
-        "@type": "xsd:dateTime",
-    };
-    targetContext["dcterms"] = "http://purl.org/dc/terms/";
-    targetContext["tree"] = "https://w3id.org/tree/terms#";
-    targetContext["tree:node"] = {
-        "@type": "@id",
-    };
-    targetContext["tiles"] = "https://w3id.org/tree/terms#";
-    targetContext["hydra"] = "http://www.w3.org/ns/hydra/core#";
-    targetContext["hydra:variableRepresentation"] = {
-        "@type": "@id",
-    };
-    targetContext["hydra:property"] = {
-        "@type": "@id",
-    };
-    targetContext["sh"] = "https://www.w3.org/ns/shacl#";
-    targetContext["sh:path"] = {
-        "@type": "@id",
-    };
-    targetContext["ngsi-ld"] = "https://uri.etsi.org/ngsi-ld/";
-}
-
-function simplifyGraph(vocabulary, graph) {
-    // fixme; simple placeholder
-    for (const entity of graph) {
-        delete entity["@context"];
-    }
 }

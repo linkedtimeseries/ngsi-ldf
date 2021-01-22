@@ -1,12 +1,14 @@
 [ngsi]
   # Location of the NGSI-LD endpoint
-  host = "http://localhost:3000"
+  host = "http://localhost:9090/ngsi-ld/v1"
 
 [api]
   # Base URI of the generated fragments
   host = "http://localhost:3001"
-  # number of observations to include in the /latest fragments
-  lastN = 100
+  # time range (last number of minutes) to include in the /latest fragments
+  lastNumberOfMinutes = 100
+  # Use NGSI metadata model or simplified keyValues
+  keyValues = true
 
 [data]
   # NGSI-LD exclusively uses relative property URIs

@@ -19,6 +19,7 @@
     "debug": "^2.2.0",
     "express": "^4.17.1",
     "h3-js": "^3.6.1",
+    "jsonld-context-parser": "^2.1.1",
     "md5": "^2.2.1",
     "ngeohash": "^0.6.3",
     "node-fetch": "^2.6.0",

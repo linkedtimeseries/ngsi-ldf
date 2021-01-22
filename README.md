@@ -35,13 +35,15 @@ The root directory contains a configuration file (`config.toml`) that contains t
 ```toml
 [ngsi]
   # Location of the NGSI-LD endpoint
-  host = "http://localhost:3000"
+  host = "http://localhost:9090/ngsi-ld/v1"
 
 [api]
   # Base URI of the generated fragments
   host = "http://localhost:3001"
-  # number of observations to include in the /latest fragments
-  lastN = 100
+  # time range (last number of minutes) to include in the /latest fragments (lastN is not supported with Scorpio Context Broker)
+  lastNumberOfMinutes = 100
+  # Use NGSI metadata model or simplified keyValues
+  keyValues = true
 
 [data]
   # NGSI-LD exclusively uses relative property URIs
@@ -50,6 +52,9 @@ The root directory contains a configuration file (`config.toml`) that contains t
   # This is a list of such properties that need to be made absolute
   metrics = ["NO2", "O3", "PM10", "PM1", "PM25"]
 ```
+
+The publisher can configure whether to use the simplified NGSI-LD output (keyValues) or not. 
+When using RDFS vocabularies, it's necessary to use keyValues to obtain semantically correct triples.
 
 ## Fragmentations
 
@@ -100,10 +105,11 @@ Temporal fragmentations are also used to aggregate data, in which case we can be
 
 The raw data interfaces adhere to any of these templates:
 
-* **Slippy**: `/{z}/{x}/{y}{?page}`
-* **Geohash**: `/geohash/{hash}{?page}`
-* **H3**: `/h3/{index}{?page}`
+* **Slippy**: `/{z}/{x}/{y}{?type,page}`
+* **Geohash**: `/geohash/{hash}{?type,page}`
+* **H3**: `/h3/{index}{?type,page}`
 
+Where `type` corresponds with the type of instances that need to be queried. This needs to be URI encoded, e.g. https%3A%2F%2Fdata.vlaanderen.be%2Fns%2Fgebouw%23Gebouw
 Where `page` corresponds to a XSD DateTime string in UTC. If no page starts at the specified time, the page containing that time is returned instead. All other parameters are defined in the Geospatial Fragmentations section.
 
 The `@graph` element of the returned data contains the temporal representation of all entities in the specified area, following the NGSI-LD representation for 'Query Temporal Evolution of Entities' operations, with the exception that individuals don't (necessarily) contain their own contexts. This knowledge graph can be fed into NGSI-lD compatible clients. 
@@ -114,9 +120,9 @@ General-purpose JSON-LD clients must be wary of the differences between JSON-LD 
 
 The latest data interfaces adhere to any of these templates:
 
-- **Slippy**: `/{z}/{x}/{y}/latest`
-- **Geohash**: `/geohash/{hash}/latest`
-- **H3**: `/h3/{index}/latest`
+- **Slippy**: `/{z}/{x}/{y}/latest{?type}`
+- **Geohash**: `/geohash/{hash}/latest{?type}`
+- **H3**: `/h3/{index}/latest{?type}`
 
 This interface returns raw data as well, and as such shares most of its properties with the raw data one. The difference is that this interface returns tiles that contain a fixed amount of observations -- instead of temporally fragmented pages. This is interface is more useful for application that are interested in real-time  data, as they can just periodically poll for new data. The raw data interface on the other hand is mostly useful for application that are looking for historical data.
 
@@ -166,33 +172,45 @@ The server's responses have 4 kinds of equally important headers:
 
 #### Search Template
 
-Each fragment defines its own URI structure so that clients that know which other fragments they're looking for can simply fill in the template and arrive at their destination. This kind of hypermedia control is defined using the [hydra](https://www.hydra-cg.com/spec/latest/core/) vocabulary. For example, this is a possible search template for the aggregate data:
+Each fragment defines its own URI structure so that clients that know which other fragments they're looking for can simply fill in the template and arrive at their destination. This kind of hypermedia control is defined using the [hydra](https://www.hydra-cg.com/spec/latest/core/) vocabulary. For example, this is a search template for the raw data:
 
 ```json
 "hydra:search": {
   "@type": "hydra:IriTemplate",
-  "hydra:template": "http://localhost:3001/geohash/{hash}/summary{?page,period}",
+  "hydra:template": "http://localhost:3001/{z}/{x}/{y}{?type,page}",
   "hydra:variableRepresentation": "hydra:BasicRepresentation",
   "hydra:mapping": [
-    {
-      "@type": "hydra:IriTemplateMapping",
-      "hydra:variable": "hash",
-      "hydra:property": "tiles:geohash",
-      "hydra:required": true
-    },
-    {
-      "@type": "hydra:IriTemplateMapping",
-      "hydra:variable": "page",
-      "hydra:property": "schema:startDate",
-      "hydra:required": false
-    },
-    {
-      "@type": "hydra:IriTemplateMapping",
-      "hydra:variable": "period",
-      "hydra:property": "cot:hasAggregationPeriod",
-      "hydra:required": false
-    }
-  ]
+       {
+           @type: "hydra:IriTemplateMapping",
+           hydra:variable: "z",
+           hydra:property: "tiles:zoom",
+           hydra:required: true
+       },
+       {
+           @type: "hydra:IriTemplateMapping",
+           hydra:variable: "x",
+           hydra:property: "tiles:longitudeTile",
+           hydra:required: true
+       },
+       {
+           @type: "hydra:IriTemplateMapping",
+           hydra:variable: "y",
+           hydra:property: "tiles:latitudeTile",
+           hydra:required: true
+       },
+       {
+           @type: "hydra:IriTemplateMapping",
+           hydra:variable: "type",
+           hydra:property: "rdf:type",
+           hydra:required: true
+       },
+       {
+           @type: "hydra:IriTemplateMapping",
+           hydra:variable: "page",
+           hydra:property: "schema:startDate",
+           hydra:required: false
+       }
+   ]
 }
 ```
 
@@ -205,12 +223,10 @@ Individual fragments are also linked together, so that data consumers can traver
 ![tree](img/tree.svg)
 
 
-
 In essence:
 
-* Raw and summary data pages contain links to the next and previous pages (respectively using `tree:GreaterThanRelation` and `tree:LesserThanRelation` links).
+* Raw ~~and summary~~ data pages contain links to the next and previous pages (respectively using `tree:GreaterThanRelation` and `tree:LessThanRelation` links).
 * The active raw data page, that is the one that contains observations happening right now, is linked with the latest data fragment with `tree:AlternativeViewRelation` links.
-* The summary data pages refer to the raw data pages that were used to compute the aggregate values with `tree:DerivedFromRelation` links.
 
 ## Equivalent NGSI-LD Requests
 
@@ -218,8 +234,8 @@ Incoming raw data or latest data requests get translated to NGSI-LD requests, th
 
 |        | NGSI-LDF                                      | NGSI-LD                                                      |
 | ------ | --------------------------------------------- | ------------------------------------------------------------ |
-| Raw    | `/14/8393/5467?page=2019-11-06T15:00:00.000Z` | `/temporal/entities?georel=within&geometry=Polygon&coordinates=[[[4.41650390625,51.248163159055906],[4.41650390625,51.2344073516346],[4.4384765625,51.2344073516346],[4.4384765625,51.2344073516346]]]&timerel=between&time=2019-11-06T15:00:00.000Z&endTime=2019-11-06T16:00:00.000Z` |
-| Latest | `/14/8393/5467/latest`                        | `/temporal/entities?georel=within&geometry=Polygon&coordinates=[[[4.41650390625,51.248163159055906],[4.41650390625,51.2344073516346],[4.4384765625,51.2344073516346],[4.4384765625,51.2344073516346]]]&timerel=before&time=2019-11-06T16:04:43.640Z&lastN=100` |
+| Raw    | `/14/8393/5467?type=https%3A%2F%2Fdata.vlaanderen.be%2Fns%2Fgebouw%23Gebouw&page=2019-11-06T15:00:00.000Z` | `/temporal/entities?type=https%3A%2F%2Fdata.vlaanderen.be%2Fns%2Fgebouw%23Gebouw&georel=within&geometry=Polygon&coordinates=[[[4.41650390625,51.248163159055906],[4.41650390625,51.2344073516346],[4.4384765625,51.2344073516346],[4.4384765625,51.2344073516346]]]&timerel=between&time=2019-11-06T15:00:00.000Z&endTime=2019-11-06T16:00:00.000Z&timeproperty=modifiedAt&options=sysAttrs` |
+| Latest | `/14/8393/5467/latest?type=https%3A%2F%2Fdata.vlaanderen.be%2Fns%2Fgebouw%23Gebouw`                        | `/temporal/entities?type=https%3A%2F%2Fdata.vlaanderen.be%2Fns%2Fgebouw%23Gebouw&georel=within&geometry=Polygon&coordinates=[[[4.41650390625,51.248163159055906],[4.41650390625,51.2344073516346],[4.4384765625,51.2344073516346],[4.4384765625,51.2344073516346]]]&timerel=between&time=2019-11-05T16:04:43.640Z&endTime=2019-11-06T16:04:43.640Z&timeproperty=modifiedAt&options=sysAttrs` |
 
  
 
